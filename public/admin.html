@@ -1,0 +1,11 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Portal | WPS Academy</title><link rel="stylesheet" href="/css/style.css"></head>
+<body><header class="nav"><a class="brand" href="/">WPS <span>Academy</span></a><nav><a href="/">Website</a><button id="logout" class="btn small">Sign Out</button></nav></header>
+<main class="section"><h1>Admin Portal</h1><p>Manage users, payments, courses, lessons and grading.</p>
+<section class="panel"><h2>Students</h2><div id="users"></div></section>
+<section class="panel"><h2>Course controls</h2><div id="courses"></div></section>
+<section class="panel"><h2>Upload lecture note / video</h2><form id="lessonForm" enctype="multipart/form-data"><select name="courseId" id="lessonCourse"></select><input name="title" placeholder="Lesson title" required><input type="file" name="note" accept=".pdf,.doc,.docx"><input type="file" name="video" accept="video/*"><button class="btn">Upload lesson</button></form></section>
+<section class="panel"><h2>Create assignment / project</h2><form id="assignmentForm"><select name="courseId" id="assignmentCourse"></select><input name="title" placeholder="Title" required><textarea name="instructions" placeholder="Instructions" required></textarea><input type="date" name="dueDate"><button class="btn">Assign</button></form></section>
+<section class="panel"><h2>Submissions & grading</h2><div id="submissions"></div></section>
+<section class="panel"><h2>Payment submissions</h2><div id="payments"></div></section>
+</main><script src="/js/admin.js"></script></body></html>
