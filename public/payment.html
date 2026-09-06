@@ -1,0 +1,12 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Payment | WPS Academy</title><link rel="stylesheet" href="/css/style.css"></head>
+<body><header class="nav"><a class="brand" href="/">WPS <span>Academy</span></a></header>
+<main class="narrow"><div class="panel"><h1>Complete payment</h1><p>Choose bank transfer or cryptocurrency and submit your proof of payment. After submission, your account remains on this page while the administrator reviews your payment.</p>
+<div class="payment-info"><b>Bank transfer</b><p>Bank: ZENITH <br>Account name: Caleb John Effiong <br>Account number: 2217250685 </p><b>Crypto</b><p>USDT wallet (Bep20): 0xa5015a79b6cdb2b9efb27752df290d310c9988d5.<br><br> Amount: ₦40,000</p></div>
+<form id="paymentForm" enctype="multipart/form-data">
+<label>Payment method<select id="method" name="method"><option value="bank">Bank transfer</option><option value="crypto">Cryptocurrency</option></select></label>
+<label>Transaction/reference number<input name="reference" placeholder="Optional reference"></label>
+<label>Proof of payment<input type="file" name="proof" accept="image/*,.pdf"></label>
+<label class="check"><input type="checkbox" name="declaredPaid" value="true" required> I have paid</label>
+<button class="btn">Submit payment</button></form><p id="msg" class="msg"></p></div></main>
+<script src="/js/payment.js"></script></body></html>
