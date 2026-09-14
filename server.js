@@ -1340,7 +1340,7 @@ async function start() {
       if (!studentHasCourse(req.user, lesson.courseId)) return res.status(403).json({ error: "You are not registered for this lesson's course." });
       const course = await courseCollection.findOne({ _id: lesson.courseId });
       if (course?.locked && req.user.role !== "admin") return res.status(403).json({ error: "This course is currently locked." });
-      res.json({ lesson: { id: lesson._id.toString(), title: lesson.title, courseId: lesson.courseId.toString(), courseTitle: course?.title || "Unknown", noteUrl: lesson.note?.url || null, videoUrl: lesson.video?.url || null } });
+      res.json({ lesson: { id: lesson._id.toString(), title: lesson.title, courseId: lesson.courseId.toString(), courseTitle: course?.title || "Unknown", noteUrl: lesson.note?.url || null, videoUrl: lesson.video?.url || null, audioUrl: lesson.audio?.url || null } });
     } catch (e) { next(e); }
   });
 
@@ -1355,7 +1355,7 @@ async function start() {
       const list = await lessons.find({ courseId: id }).sort({ createdAt: 1 }).toArray();
       const progress = await lessonProgress.find({ userId: req.user._id, lessonId: { $in: list.map(l => l._id) }, completed: true }).toArray();
       const done = new Set(progress.map(p => String(p.lessonId)));
-      res.json({ course: { id: course._id.toString(), title: course.title, description: course.description, locked: !!course.locked }, lessons: list.map(l => ({ id: l._id.toString(), title: l.title, note_path: l.note?.url || "", video_path: l.video?.url || "", completed: done.has(l._id.toString()) })) });
+      res.json({ course: { id: course._id.toString(), title: course.title, description: course.description, locked: !!course.locked }, lessons: list.map(l => ({ id: l._id.toString(), title: l.title, note_path: l.note?.url || "", video_path: l.video?.url || "", audio_path: l.audio?.url || "", completed: done.has(l._id.toString()) })) });
     } catch (e) { next(e); }
   });
 
