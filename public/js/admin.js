@@ -66,8 +66,7 @@ async function init() {
       window.__adminLessons = l.lessons || [];
       document.getElementById('lessons').innerHTML = (l.lessons || []).map(x => `
         <div class="row"><span><b>${escapeHtml(x.title)}</b><br><small>${escapeHtml(x.course_title || 'Unknown course')}</small><br>
-          ${x.note_path ? `<a href="${escapeAttr(x.note_path)}" target="_blank" rel="noopener">Lesson note</a>` : ''}${x.note_path && x.video_path ? ' · ' : ''}${x.video_path ? `<a href="${escapeAttr(x.video_path)}" target="_blank" rel="noopener">Video</a>` : ''}
-        </span><span><button class="ghost-btn small admin-action" data-action="delete-lesson" data-id="${x.id}">Delete Lesson</button></span></div>`).join('') || '<p>No lessons uploaded yet.</p>';
+${x.note_path ? <a href="${escapeAttr(x.note_path)}" target="_blank" rel="noopener">Lesson note</a> : ''}${x.note_path && x.video_path ? ' · ' : ''}${x.video_path ? <a href="${escapeAttr(x.video_path)}" target="_blank" rel="noopener">Video</a> : ''}${(x.note_path || x.video_path) && x.audio_path ? ' · ' : ''}${x.audio_path ? <a href="${escapeAttr(x.audio_path)}" target="_blank" rel="noopener">Audio</a> : ''}        </span><span><button class="ghost-btn small admin-action" data-action="delete-lesson" data-id="${x.id}">Delete Lesson</button></span></div>`).join('') || '<p>No lessons uploaded yet.</p>';
 
       document.getElementById('payments').innerHTML = p.payments.map(x => `
         <div class="row"><span>${escapeHtml(x.name)} (${escapeHtml(x.email)}) — ${escapeHtml(x.method)}<br>
@@ -144,7 +143,7 @@ async function init() {
           await api('/api/admin/courses/' + id, { method: 'DELETE' });
         } else if (action === 'delete-lesson') {
           const lesson = (window.__adminLessons || []).find(x => x.id === id);
-          if (!confirm(`Delete "${lesson?.title || 'this lesson'}"? This permanently deletes the lesson and its uploaded note/video from Cloudinary.`)) {
+          if (!confirm(`Delete "${lesson?.title || 'this lesson'}"? This permanently deletes the lesson and its uploaded note,video and audio from Cloudinary.`)) {
             btn.disabled = false; btn.textContent = oldText; return;
           }
           await api('/api/admin/lessons/' + id, { method: 'DELETE' });
