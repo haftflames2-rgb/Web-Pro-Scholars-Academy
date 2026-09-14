@@ -113,15 +113,20 @@ function uploadPrivateProof(buffer, originalName) {
 
 function privateCloudinaryUrl(proof) {
   if (!proof?.publicId) return null;
+
   try {
+    const resourceType = proof.resourceType || "image";
+
     return cloudinary.url(proof.publicId, {
       secure: true,
-      resource_type: proof.resourceType || "image",
+      resource_type: resourceType,
       type: "authenticated",
-      sign_url: true,
-      auth_token: { start: Math.floor(Date.now() / 1000), duration: 15 * 60 }
+      sign_url: true
     });
-  } catch { return null; }
+  } catch (error) {
+    console.error("Cloudinary proof URL generation failed:", error);
+    return null;
+  }
 }
 
 function uploadGenerated(buffer, publicId, resourceType = "raw", format = undefined) {
@@ -748,7 +753,7 @@ async function start() {
     } catch (e) { next(e); }
   });
 
-  app.post("/api/admin/lessons", auth, admin, upload.fields([{ name: "note", maxCount: 1 }, { name: "video", maxCount: 1 }]), async (req, res, next) => {
+  app.post("/api/admin/lessons", auth, admin, upload.fields([{ name: "note", maxCount: 1 }, { name: "video", maxCount: 1 }, { name: "audio", maxCount: 1 }]), async (req, res, next) => {
     try {
       const courseId = oid(req.body.courseId);
       const title = String(req.body.title || "").trim();
@@ -758,10 +763,14 @@ async function start() {
 
       const noteFile = req.files?.note?.[0];
       const videoFile = req.files?.video?.[0];
+      const audioFile = req.files?.video?.[0];
       if (noteFile && !hasAllowedExtension(noteFile, noteExtensions)) return res.status(400).json({ error: "Lesson notes must be PDF, DOC, DOCX, TXT, or MD." });
       if (videoFile && !hasAllowedExtension(videoFile, videoExtensions)) return res.status(400).json({ error: "Lesson video must be MP4, WEBM, MOV, or M4V." });
+      if (audioFile && !hasAllowedExtension(audioFile, videoExtensions)) return res.status(400).json({ error: "Lesson video must be MP3, WAV, M4A, or OGG." });
+
       let note = null;
       let video = null;
+      let audio = null;
       if (noteFile) {
         const r = await uploadBuffer(noteFile.buffer, noteFile.originalname, "lesson-notes");
         note = { url: r.secure_url, publicId: r.public_id, resourceType: r.resource_type || "raw", type: r.type || "upload", originalName: noteFile.originalname };
@@ -770,7 +779,11 @@ async function start() {
         const r = await uploadBuffer(videoFile.buffer, videoFile.originalname, "lesson-videos");
         video = { url: r.secure_url, publicId: r.public_id, resourceType: r.resource_type || "video", type: r.type || "upload", originalName: videoFile.originalname };
       }
-      const result = await lessons.insertOne({ courseId, title, note, video, createdAt: new Date() });
+       if (audioFile) {
+        const r = await uploadBuffer(audioFile.buffer, audioFile.originalname, "lesson-audio");
+        audio = { url: r.secure_url, publicId: r.public_id, resourceType: r.resource_type || "video", type: r.type || "upload", originalName: audioFile.originalname };
+      }
+      const result = await lessons.insertOne({ courseId, title, note, video, audio, createdAt: new Date() });
       res.json({ ok: true, id: result.insertedId.toString() });
     } catch (e) { next(e); }
   });
@@ -781,7 +794,7 @@ async function start() {
       const result = [];
       for (const l of list) {
         const c = await courseCollection.findOne({ _id: l.courseId });
-        result.push({ id: l._id.toString(), title: l.title, course_title: c?.title || "Unknown", note_path: l.note?.url || "", video_path: l.video?.url || "" });
+        result.push({ id: l._id.toString(), title: l.title, course_title: c?.title || "Unknown", note_path: l.note?.url || "", video_path: l.video?.url || "", audio_path: l.video?.url || "" });
       }
       res.json({ lessons: result });
     } catch (e) { next(e); }
@@ -796,7 +809,8 @@ async function start() {
 
       await Promise.all([
         destroyCloudinaryAsset(lesson.note, "raw"),
-        destroyCloudinaryAsset(lesson.video, "video")
+        destroyCloudinaryAsset(lesson.video, "video"),
+        destroyCloudinaryAsset(lesson.audio, "video")
       ]);
 
       await Promise.all([
