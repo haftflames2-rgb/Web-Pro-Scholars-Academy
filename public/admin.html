@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Portal | WPS Academy</title><link rel="stylesheet" href="/css/style.css"></head>
+<body><header class="nav"><a class="brand" href="/">WPS <span>Academy</span></a><nav><a href="/">Website</a><button id="logout" class="btn small">Sign Out</button></nav></header>
+<main class="section"><h1>Admin Portal</h1><p>Manage users, payments, courses, lessons and grading.</p>
+<section class="panel"><h2>AI Daily Limits</h2><p>Control how many AI credits each student can use per UTC day. Credits reset automatically each day.</p><form id="aiLimitsForm" class="ai-limit-form">
+<label>Daily credits per student<input id="aiDailyCredits" type="number" min="0" max="100000" required></label>
+<label class="check"><input id="aiUnlimitedAdmins" type="checkbox" checked> Admins have unlimited AI credits</label>
+<div class="ai-cost-grid">
+<label>Chat<input id="costChat" type="number" min="0" max="1000"></label>
+<label>Image<input id="costImage" type="number" min="0" max="1000"></label>
+<label>Document / DOCX / PDF<input id="costDocument" type="number" min="0" max="1000"></label>
+<label>Video<input id="costVideo" type="number" min="0" max="1000"></label>
+<label>Voice<input id="costSpeech" type="number" min="0" max="1000"></label>
+<label>Quiz<input id="costQuiz" type="number" min="0" max="1000"></label>
+<label>Study plan<input id="costStudyPlan" type="number" min="0" max="1000"></label>
+</div><button class="btn" type="submit">Save AI limits</button> <button class="ghost-btn" type="button" id="resetAiUsage">Reset today's student usage</button><span id="aiLimitMsg" class="msg"></span></form>
+<div id="aiUsageSummary"></div></section>
+<section class="panel"><h2>Students & individual course access</h2><p>Search students by name or email, open a student's portal, lock their whole portal, manage course access, or permanently delete the account.</p><label>Search students<input id="studentSearch" type="search" placeholder="Search by name or email…" autocomplete="off"></label><div id="studentSearchMeta" class="msg" aria-live="polite"></div><div id="users"></div></section>
+<section class="panel"><h2>Course management</h2><p>Create, edit, lock/unlock, or permanently delete courses. Deleting a course also removes its lessons, assignments, submissions, progress records, and student enrollment references.</p><form id="courseForm" class="ai-limit-form"><input type="hidden" id="courseId"><label>Course name<input id="courseTitle" maxlength="120" required></label><label>Description<textarea id="courseDescription" maxlength="2000" placeholder="Course description"></textarea></label><div class="ai-cost-grid"><label>Price<input id="coursePrice" type="number" min="0" step="0.01" value="0"></label><label>Thumbnail URL<input id="courseThumbnail" type="url" placeholder="https://..."></label></div><label class="check"><input id="courseLocked" type="checkbox"> Locked by default</label><button class="btn" type="submit" id="courseSaveBtn">Create course</button> <button class="ghost-btn" type="button" id="courseCancelBtn" hidden>Cancel edit</button><span id="courseMsg" class="msg"></span></form><div id="courses"></div></section>
+<section class="panel"><h2>Upload lecture note / video</h2><form id="lessonForm" enctype="multipart/form-data"><select name="courseId" id="lessonCourse"></select><input name="title" placeholder="Lesson title" required><input type="file" name="note" accept=".pdf,.doc,.docx"><input type="file" name="video" accept="video/*"><button class="btn">Upload lesson</button></form></section><section class="panel"><h2>Uploaded lessons</h2><p>Delete a lesson to permanently remove its lesson record and associated note/video from Cloudinary.</p><div id="lessons"></div></section>
+<section class="panel"><h2>Create assignment / project</h2><form id="assignmentForm"><select name="courseId" id="assignmentCourse"></select><input name="title" placeholder="Title" required><textarea name="instructions" placeholder="Instructions" required></textarea><input type="date" name="dueDate"><button class="btn">Assign</button></form></section>
+<section class="panel"><h2>Submissions & grading</h2><div id="submissions"></div></section>
+<section class="panel"><h2>Payment submissions</h2><div id="payments"></div></section>
+</main><script src="/js/admin.js"></script></body></html>
