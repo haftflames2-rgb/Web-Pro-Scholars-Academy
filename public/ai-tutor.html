@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Tutor | WPS Academy</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="ai-page">
+<header class="nav">
+  <a class="brand" href="/">WPS <span>Academy</span></a>
+  <nav><a href="/student.html">Student Portal</a><button id="logout" class="btn small">Sign Out</button></nav>
+</header>
+<main class="ai-shell">
+  <aside class="ai-sidebar">
+    <button id="newChat" class="btn full">＋ New chat</button>
+    <div class="ai-sidebar-title">Learning tools</div><div class="ai-tools"><button id="quizTool" class="ghost-btn">📝 Practice quiz</button><button id="planTool" class="ghost-btn">🗓️ Study plan</button><button id="imageTool" class="ghost-btn">🖼️ Create image</button><button id="documentTool" class="ghost-btn">📄 Create document</button><button id="videoTool" class="ghost-btn">🎬 Create video</button><a href="/live-tutor.html" class="ghost-btn live-link">🔴 Live AI Tutor</a></div><div class="ai-sidebar-title">Conversations</div>
+    <div id="conversationList" class="conversation-list"></div>
+    <div class="ai-sidebar-note">Your AI conversations are stored in your WPS Academy account so you can continue later.</div>
+  </aside>
+  <section class="ai-main">
+    <div class="ai-header">
+      <div><div class="eyebrow">WPS ACADEMY</div><h1>🤖 AI Tutor</h1><p id="welcome">Your personal learning assistant.</p></div>
+      <div class="ai-status"><span id="statusDot">●</span> <span id="statusText">Checking AI...</span><br><span id="quotaText">AI credits: checking...</span></div>
+    </div>
+    <div id="messages" class="ai-messages">
+      <div class="ai-welcome panel">
+        <div class="ai-avatar">🤖</div>
+        <h2>How can I help you learn?</h2>
+        <p>Ask me to explain a topic, review an assignment, create a quiz, or help you understand your WPS Academy lessons.</p>
+        <div class="suggestions">
+          <button data-prompt="Explain JavaScript variables to me like I am a beginner.">Explain a topic</button>
+          <button data-prompt="Create a 10-question quiz for me on web development.">Create a quiz</button>
+          <button data-prompt="What assignments do I currently have?">My assignments</button>
+          <button data-prompt="What should I study next in WPS Academy?">What should I study next?</button>
+        </div>
+      </div>
+    </div>
+    <form id="chatForm" class="ai-composer">
+      <div id="attachmentPreview" class="attachment-preview hidden"></div>
+      <textarea id="messageInput" rows="2" maxlength="5000" placeholder="Ask your AI Tutor anything..."></textarea>
+      <div class="composer-row">
+        <div class="composer-tools">
+          <label class="file-btn" title="Attach a lesson note, PDF, image, document, or code file">📎 Attach <input id="fileInput" type="file" hidden accept=".pdf,.txt,.md,.csv,.json,.js,.ts,.jsx,.tsx,.py,.html,.css,.java,.cs,.doc,.docx,.ppt,.pptx,.xls,.xlsx,image/*"></label>
+          <button type="button" id="voiceBtn" class="ghost-btn" title="Use your device microphone">🎙️ Voice</button>
+          <button type="button" id="clearBtn" class="ghost-btn">Clear</button>
+        </div>
+        <button id="sendBtn" class="btn" type="submit">Send ➤</button>
+      </div>
+      <div class="ai-disclaimer">AI can make mistakes. Check important academic information against your course material. Generated files are stored in WPS Academy Cloudinary storage.</div>
+    </form>
+  </section>
+</main>
+<div id="toolModal" class="tool-modal hidden"><div class="tool-dialog"><button id="closeTool" class="tool-close">×</button><div id="toolContent"></div></div></div>
+<script src="/js/ai-tutor.js"></script>
+</body>
+</html>
