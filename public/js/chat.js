@@ -1,0 +1,277 @@
+const $ = id => document.getElementById(id);
+let conversations = [], users = [], activeId = null, lastMessageId = null, pollTimer = null, loading = false, myId = '';
+let mediaRecorder = null, recordedChunks = [], recordingStream = null, recordingStartedAt = 0, recordingTimer = null;
+let audioContext = null, audioSource = null, audioProcessor = null, recordedPcmChunks = [], recordingSampleRate = 44100;
+let pendingVoiceFile = null, pendingVoiceUrl = null, replyTarget = null;
+
+async function api(url, opts = {}) {
+  const r = await fetch(url, opts);
+  let d = {};
+  try { d = await r.json(); } catch {}
+  if (!r.ok) throw new Error(d.error || 'Request failed');
+  return d;
+}
+function esc(s) { return String(s ?? '').replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c])); }
+function fmtTime(v) { if (!v) return ''; const d = new Date(v), now = new Date(); return d.toDateString() === now.toDateString() ? d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : d.toLocaleDateString([], {day:'2-digit', month:'short'}); }
+function avatar(name) { return esc((String(name || 'W').trim()[0] || 'W').toUpperCase()); }
+
+async function init() {
+  try {
+    const me = await api('/api/me');
+    if (!me.user) return location = '/login.html';
+    myId = me.user.id || me.user._id?.toString() || '';
+    window.currentUserRole = me.user.role || 'student'; $('chatUser').textContent = me.user.name || '';
+    $('backPortal').href = me.user.role === 'admin' ? '/admin.html' : '/student.html';
+    await loadUsers();
+    await loadConversations();
+    bind();
+  } catch (e) { alert(e.message); location = '/login.html'; }
+}
+async function loadUsers() { const d = await api('/api/chat/users'); users = d.users || []; renderUsers(); }
+async function loadConversations() {
+  const d = await api('/api/chat/conversations'); conversations = d.conversations || [];
+  renderConversations();
+  if (activeId) { const c = conversations.find(x => x.id === activeId); if (c) { updateHeader(c); await loadMessages(true); } else closeRoom(); }
+}
+function renderConversations() {
+  const q = ($('chatSearch').value || '').toLowerCase();
+  const list = conversations.filter(c => (c.name + ' ' + c.lastMessage).toLowerCase().includes(q));
+  $('conversationList').innerHTML = list.length ? list.map(c => `<div class="chat-row ${c.id === activeId ? 'active' : ''}" data-id="${c.id}"><div class="chat-avatar">${avatar(c.name)}</div><div class="chat-row-info"><div class="chat-row-top"><span class="chat-row-name">${esc(c.name)}${c.type === 'group' ? ' 👥' : ''}</span><span class="chat-row-time">${fmtTime(c.lastMessageAt)}</span></div><div class="chat-row-preview">${esc(c.lastMessage || 'Start a conversation')}</div></div>${c.unread ? `<span class="chat-unread">${c.unread > 99 ? '99+' : c.unread}</span>` : ''}</div>`).join('') : '<div class="chat-empty">No chats yet.<br>Start a conversation.</div>';
+  document.querySelectorAll('.chat-row').forEach(x => x.onclick = () => openRoom(x.dataset.id));
+}
+function renderUsers() {
+  const q = ($('userSearch').value || '').toLowerCase();
+  const rows = users.filter(u => (u.name + ' ' + u.email).toLowerCase().includes(q));
+  $('userList').innerHTML = rows.length ? rows.map(u => `<div class="chat-user direct-user" data-id="${u.id}"><div class="chat-avatar">${avatar(u.name)}</div><div><div class="chat-user-name">${esc(u.name)}</div><div class="chat-user-role">${esc(u.role)}</div></div></div>`).join('') : '<div class="chat-empty">No people found.</div>';
+  $('groupUserList').innerHTML = users.map(u => `<label class="chat-user"><input type="checkbox" value="${u.id}"><div class="chat-avatar">${avatar(u.name)}</div><div><div class="chat-user-name">${esc(u.name)}</div><div class="chat-user-role">${esc(u.role)}</div></div></label>`).join('') || '<div class="chat-empty">No people available.</div>';
+  document.querySelectorAll('.direct-user').forEach(x => x.onclick = () => startDirect(x.dataset.id));
+}
+async function startDirect(id) { try { const d = await api('/api/chat/direct', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:id})}); closeModal(); await loadConversations(); openRoom(d.conversation.id); } catch (e) { alert(e.message); } }
+async function openRoom(id) {
+  activeId = id; lastMessageId = null;
+  const c = conversations.find(x => x.id === id); if (!c) return;
+  updateHeader(c); $('chatWelcome').classList.add('hidden'); $('chatRoom').classList.remove('hidden'); document.querySelector('.chat-shell').classList.add('room-open');
+  renderConversations(); $('messageList').innerHTML = '<div class="chat-empty">Loading messages…</div>'; await loadMessages(true); await markRead();
+}
+function updateHeader(c) { $('roomTitle').textContent = c.name; $('roomMeta').textContent = c.type === 'group' ? `${c.memberCount} members` : (c.members?.find(m => m.id !== myId)?.role || 'Direct chat'); $('roomAvatar').textContent = String(c.name || 'W')[0].toUpperCase(); }
+async function loadMessages(full = false) {
+  if (!activeId || loading) return; loading = true;
+  try {
+    const d = await api(`/api/chat/conversations/${activeId}/messages${full || !lastMessageId ? '' : '?after=' + encodeURIComponent(lastMessageId)}`);
+    const msgs = d.messages || []; if (full) $('messageList').innerHTML = '';
+    for (const m of msgs) appendMessage(m);
+    if (msgs.length) { lastMessageId = msgs[msgs.length - 1].id; $('messageList').scrollTop = $('messageList').scrollHeight; }
+    if (!full && msgs.length) await markRead();
+  } catch (e) { if (full) $('messageList').innerHTML = `<div class="chat-empty">${esc(e.message)}</div>`; }
+  finally { loading = false; }
+}
+
+function replyMarkup(r) {
+  if (!r) return '';
+  const label = r.deleted ? 'This message was deleted' : (r.text || (r.attachment ? ({image:'📷 Image', video:'🎥 Video', audio:'🎤 Audio', document:'📄 Document'}[r.attachment.kind] || 'Attachment') : 'Message'));
+  return `<button type="button" class="chat-reply-quote" data-jump-message="${esc(r.messageId)}"><span class="chat-reply-line"></span><span><b>${esc(r.senderName || 'WPS Academy User')}</b><small>${esc(label)}</small></span></button>`;
+}
+function attachmentMarkup(a, messageId) {
+  if (!a) return '';
+  const name = esc(a.name || 'Attachment');
+  const contentUrl = `/api/chat/attachments/${encodeURIComponent(messageId)}/content`;
+  if (a.kind === 'image') return `<a class="chat-media-link" href="${contentUrl}" target="_blank" rel="noopener"><img class="chat-image" src="${contentUrl}" alt="${name}" loading="lazy"></a>`;
+  if (a.kind === 'video') return `<video class="chat-video" controls preload="metadata" playsinline src="${contentUrl}"></video>`;
+  if (a.kind === 'audio') return `<audio class="chat-audio" controls preload="metadata" src="${contentUrl}"></audio>`;
+  const downloadUrl = `/api/chat/attachments/${encodeURIComponent(messageId)}/download`;
+  return `<a class="chat-file" href="${downloadUrl}" target="_blank" rel="noopener"><span class="chat-file-icon">📄</span><span><b>${name}</b><small>DOCX document</small></span></a>`;
+}
+function messageActions(m) {
+  if (m.deleted) return '';
+  const mine = m.senderId === myId;
+  return `<div class="chat-message-actions"><button type="button" class="chat-action-btn" data-reply-message="${esc(m.id)}" title="Reply">↩ Reply</button>${mine || window.currentUserRole === 'admin' ? `<button type="button" class="chat-action-btn danger" data-delete-message="${esc(m.id)}" title="Delete message">🗑 Delete</button>` : ''}</div>`;
+}
+function appendMessage(m) {
+  const existing = document.querySelector(`[data-message-id="${m.id}"]`);
+  if (existing) {
+    if (m.deleted && !existing.querySelector('.chat-deleted-message')) {
+      const bubble = existing.querySelector('.chat-bubble');
+      if (bubble) bubble.innerHTML = `<div class="chat-deleted-message">🚫 This message was deleted</div><span class="chat-time">${fmtTime(m.deletedAt || m.createdAt)}</span>`;
+    }
+    return;
+  }
+  const mine = m.senderId === myId, wrap = document.createElement('div');
+  wrap.className = 'chat-bubble-wrap ' + (mine ? 'mine' : 'theirs'); wrap.dataset.messageId = m.id;
+  const bubble = document.createElement('div'); bubble.className = 'chat-bubble';
+  if (m.deleted) {
+    bubble.innerHTML = `<div class="chat-deleted-message">🚫 This message was deleted</div><span class="chat-time">${fmtTime(m.deletedAt || m.createdAt)}</span>`;
+  } else {
+    bubble.innerHTML = `${!mine ? `<div class="chat-sender">${esc(m.senderName)}</div>` : ''}${replyMarkup(m.replyTo)}${m.text ? `<div class="chat-text">${esc(m.text)}</div>` : ''}${attachmentMarkup(m.attachment, m.id)}<span class="chat-time">${fmtTime(m.createdAt)}${mine ? ' ✓' : ''}</span>${messageActions(m)}`;
+  }
+  wrap.appendChild(bubble); $('messageList').appendChild(wrap);
+  wrap.querySelectorAll('[data-reply-message]').forEach(btn => btn.onclick = () => beginReply(m));
+  wrap.querySelectorAll('[data-delete-message]').forEach(btn => btn.onclick = () => deleteMessage(m.id));
+  wrap.querySelectorAll('[data-jump-message]').forEach(btn => btn.onclick = () => jumpToMessage(btn.dataset.jumpMessage));
+}
+async function markRead() { if (activeId) try { await api(`/api/chat/conversations/${activeId}/read`, {method:'POST'}); } catch {} }
+
+async function sendMessage(e) {
+  e.preventDefault();
+  if (!activeId) return;
+  const input = $('messageInput'), text = input.value.trim();
+  if (pendingVoiceFile) {
+    const file = pendingVoiceFile;
+    await sendAttachment(file, text, true);
+    return;
+  }
+  if (!text) return;
+  input.disabled = true;
+  try {
+    const body = { text, replyToId: replyTarget?.id || null };
+    const d = await api(`/api/chat/conversations/${activeId}/messages`, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    appendMessage(d.message); lastMessageId = d.message.id; input.value = ''; clearReplyTarget(); $('messageList').scrollTop = $('messageList').scrollHeight; await loadConversations();
+  } catch (e) { alert(e.message); }
+  finally { input.disabled = false; input.focus(); }
+}
+async function sendAttachment(file, caption = '', isVoice = false) {
+  if (!activeId || !file) return;
+  const form = new FormData(); form.append('file', file); if (caption) form.append('text', caption); if (replyTarget?.id) form.append('replyToId', replyTarget.id);
+  setComposerBusy(true);
+  try {
+    const d = await api(`/api/chat/conversations/${activeId}/attachments`, {method:'POST', body:form});
+    appendMessage(d.message); lastMessageId = d.message.id; $('messageInput').value = ''; if (isVoice) { pendingVoiceFile = null; hideVoicePreview(); } clearReplyTarget(); $('messageList').scrollTop = $('messageList').scrollHeight; await loadConversations();
+  } catch (e) { alert(e.message); }
+  finally { setComposerBusy(false); }
+}
+function beginReply(m) {
+  if (!m || m.deleted) return;
+  replyTarget = { id: m.id, senderName: m.senderName, text: m.text || '', attachment: m.attachment || null };
+  renderReplyBar();
+  $('messageInput').focus();
+  $('messageInput').scrollIntoView({ block: 'nearest' });
+}
+function renderReplyBar() {
+  let bar = document.getElementById('chatReplyBar');
+  if (!replyTarget) { if (bar) bar.remove(); return; }
+  if (!bar) { bar = document.createElement('div'); bar.id = 'chatReplyBar'; bar.className = 'chat-reply-bar'; $('messageForm').prepend(bar); }
+  const label = replyTarget.text || (replyTarget.attachment ? ({image:'📷 Image',video:'🎥 Video',audio:'🎤 Audio',document:'📄 Document'}[replyTarget.attachment.kind] || 'Attachment') : 'Message');
+  bar.innerHTML = `<div class="chat-reply-bar-content"><span class="chat-reply-line"></span><div><b>Replying to ${esc(replyTarget.senderName || 'WPS Academy User')}</b><small>${esc(label)}</small></div></div><button type="button" id="cancelReplyBtn" class="chat-cancel-reply" title="Cancel reply">×</button>`;
+  bar.querySelector('#cancelReplyBtn').onclick = clearReplyTarget;
+}
+function clearReplyTarget() { replyTarget = null; const bar = document.getElementById('chatReplyBar'); if (bar) bar.remove(); }
+function jumpToMessage(id) {
+  const el = document.querySelector(`[data-message-id="${CSS.escape(id)}"]`);
+  if (!el) return;
+  el.scrollIntoView({ behavior:'smooth', block:'center' });
+  el.classList.add('chat-message-highlight');
+  setTimeout(() => el.classList.remove('chat-message-highlight'), 1400);
+}
+async function deleteMessage(id) {
+  if (!activeId || !id) return;
+  if (!confirm('Delete this message?')) return;
+  try {
+    await api(`/api/chat/conversations/${encodeURIComponent(activeId)}/messages/${encodeURIComponent(id)}`, {method:'DELETE'});
+    const el = document.querySelector(`[data-message-id="${CSS.escape(id)}"]`);
+    if (el) {
+      const bubble = el.querySelector('.chat-bubble');
+      if (bubble) bubble.innerHTML = `<div class="chat-deleted-message">🚫 This message was deleted</div><span class="chat-time">Just now</span>`;
+    }
+    if (replyTarget?.id === id) clearReplyTarget();
+    await loadConversations();
+  } catch (e) { alert(e.message); }
+}
+function setComposerBusy(busy) { $('messageInput').disabled = busy; $('attachBtn').disabled = busy; $('recordAudioBtn').disabled = busy || !!audioProcessor || !!mediaRecorder; $('chatSend').disabled = busy; }
+
+function formatDuration(seconds) { const s = Math.max(0, Math.floor(seconds)); return `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`; }
+function updateRecordingTimer() { if (!recordingStartedAt) return; $('recordingTime').textContent = formatDuration((Date.now() - recordingStartedAt) / 1000); }
+function showRecordingPanel() { $('recordingPanel').classList.remove('hidden'); }
+function hideRecordingPanel() { $('recordingPanel').classList.add('hidden'); }
+function hideVoicePreview() {
+  if (pendingVoiceUrl) { URL.revokeObjectURL(pendingVoiceUrl); pendingVoiceUrl = null; }
+  $('voicePreview').classList.add('hidden'); $('voicePreviewAudio').removeAttribute('src'); $('voicePreviewAudio').load(); $('recordingPanel').classList.add('hidden');
+  $('recordAudioBtn').textContent = '🎙️'; $('recordAudioBtn').title = 'Record audio'; $('recordingStatus').textContent = 'Record a voice message'; $('recordingTime').textContent = '00:00';
+}
+function clearPendingVoice() { pendingVoiceFile = null; hideVoicePreview(); $('messageInput').focus(); }
+function mergePcm(chunks) {
+  const length = chunks.reduce((n, c) => n + c.length, 0);
+  const result = new Float32Array(length); let offset = 0;
+  for (const c of chunks) { result.set(c, offset); offset += c.length; }
+  return result;
+}
+function encodeWav(samples, sampleRate) {
+  const buffer = new ArrayBuffer(44 + samples.length * 2), view = new DataView(buffer);
+  const write = (offset, text) => { for (let i = 0; i < text.length; i++) view.setUint8(offset + i, text.charCodeAt(i)); };
+  write(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); write(8, 'WAVE'); write(12, 'fmt ');
+  view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true); view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * 2, true); view.setUint16(32, 2, true); view.setUint16(34, 16, true); write(36, 'data'); view.setUint32(40, samples.length * 2, true);
+  let pos = 44;
+  for (let i = 0; i < samples.length; i++, pos += 2) { const x = Math.max(-1, Math.min(1, samples[i])); view.setInt16(pos, x < 0 ? x * 0x8000 : x * 0x7fff, true); }
+  return new Blob([view], { type: 'audio/wav' });
+}
+async function finishPcmRecording() {
+  const samples = mergePcm(recordedPcmChunks); recordedPcmChunks = [];
+  if (audioProcessor) { audioProcessor.onaudioprocess = null; try { audioProcessor.disconnect(); } catch {} audioProcessor = null; }
+  if (audioSource) { try { audioSource.disconnect(); } catch {} audioSource = null; }
+  if (recordingStream) { recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null; }
+  if (audioContext) { try { await audioContext.close(); } catch {} audioContext = null; }
+  clearInterval(recordingTimer); recordingTimer = null; recordingStartedAt = 0;
+  $('recordAudioBtn').textContent = '🎙️'; $('recordAudioBtn').title = 'Record audio';
+  if (!samples.length) { hideRecordingPanel(); return; }
+  const blob = encodeWav(samples, recordingSampleRate);
+  pendingVoiceFile = new File([blob], `voice-message-${Date.now()}.wav`, { type: 'audio/wav' });
+  if (pendingVoiceUrl) URL.revokeObjectURL(pendingVoiceUrl);
+  pendingVoiceUrl = URL.createObjectURL(blob);
+  const previewAudio = $('voicePreviewAudio');
+  previewAudio.pause();
+  previewAudio.removeAttribute('src');
+  previewAudio.load();
+  previewAudio.src = pendingVoiceUrl;
+  previewAudio.preload = 'auto';
+  previewAudio.load();
+  previewAudio.onloadedmetadata = () => {
+    const duration = Number.isFinite(previewAudio.duration) ? previewAudio.duration : 0;
+    $('recordingStatus').textContent = `Voice message ready — preview it (${formatDuration(duration)}) or delete it before sending`;
+  };
+  previewAudio.oncanplay = () => {
+    $('recordingStatus').textContent = 'Voice message ready — tap play to preview, or delete it before sending';
+  };
+  previewAudio.onerror = () => {
+    $('recordingStatus').textContent = 'Preview could not load. You can delete and record again.';
+  };
+  $('voicePreview').classList.remove('hidden'); $('recordingPanel').classList.remove('hidden'); $('chatSend').disabled = false;
+}
+async function startAudioRecording() {
+  if (audioProcessor || mediaRecorder) { stopAudioRecording(); return; }
+  if (pendingVoiceFile) { clearPendingVoice(); return; }
+  if (!navigator.mediaDevices?.getUserMedia || typeof AudioContext === 'undefined') { alert('Audio recording is not supported by this browser. You can still attach an audio file.'); return; }
+  try {
+    recordingStream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+    audioContext = new AudioContext(); await audioContext.resume(); recordingSampleRate = audioContext.sampleRate;
+    audioSource = audioContext.createMediaStreamSource(recordingStream); audioProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+    const silentGain = audioContext.createGain(); silentGain.gain.value = 0;
+    recordedPcmChunks = []; recordingStartedAt = Date.now(); updateRecordingTimer(); showRecordingPanel();
+    $('recordingStatus').textContent = 'Recording… tap ■ to stop'; $('recordAudioBtn').textContent = '⏹️'; $('recordAudioBtn').title = 'Stop recording'; $('chatSend').disabled = true;
+    audioProcessor.onaudioprocess = e => { const data = e.inputBuffer.getChannelData(0); recordedPcmChunks.push(new Float32Array(data)); };
+    audioSource.connect(audioProcessor); audioProcessor.connect(silentGain); silentGain.connect(audioContext.destination);
+    recordingTimer = setInterval(updateRecordingTimer, 250);
+  } catch (e) {
+    if (recordingStream) recordingStream.getTracks().forEach(t => t.stop()); recordingStream = null;
+    if (audioContext) { try { await audioContext.close(); } catch {} audioContext = null; }
+    audioSource = null; audioProcessor = null; hideRecordingPanel(); alert('Microphone access was not allowed. Please allow microphone access in your browser.');
+  }
+}
+async function stopAudioRecording() { if (audioProcessor) await finishPcmRecording(); else if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); }
+
+async function createGroup(e) { e.preventDefault(); const name = $('groupName').value.trim(); const ids = [...document.querySelectorAll('#groupUserList input:checked')].map(x => x.value); try { const d = await api('/api/chat/groups', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,memberIds:ids})}); closeModal(); $('groupName').value=''; await loadConversations(); openRoom(d.conversation.id); } catch (e) { alert(e.message); } }
+function showModal() { renderUsers(); $('newChatModal').classList.remove('hidden'); document.querySelector('[data-tab="direct"]').click(); }
+function closeModal() { $('newChatModal').classList.add('hidden'); }
+function closeRoom() { activeId=null; lastMessageId=null; clearPendingVoice(); $('chatRoom').classList.add('hidden'); $('chatWelcome').classList.remove('hidden'); document.querySelector('.chat-shell').classList.remove('room-open'); renderConversations(); }
+
+function bind() {
+  $('logout').onclick = async () => { await fetch('/api/logout', {method:'POST'}); location='/'; };
+  $('newChatBtn').onclick = showModal; $('startChatBtn').onclick = showModal; $('closeChatModal').onclick = closeModal;
+  $('userSearch').oninput = renderUsers; $('chatSearch').oninput = renderConversations; $('messageForm').onsubmit = sendMessage; $('groupPanel').onsubmit = createGroup; $('mobileBack').onclick = closeRoom;
+  $('attachBtn').onclick = () => $('fileInput').click();
+  $('fileInput').onchange = async e => { const file = e.target.files?.[0]; e.target.value=''; if (file) await sendAttachment(file, $('messageInput').value.trim()); };
+  $('recordAudioBtn').onclick = startAudioRecording;
+  $('deleteVoiceBtn').onclick = clearPendingVoice;
+  $('messageInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(e); } });
+  document.querySelectorAll('.chat-tab').forEach(tab => tab.onclick = () => { document.querySelectorAll('.chat-tab').forEach(x => x.classList.remove('active')); tab.classList.add('active'); const group=tab.dataset.tab==='group'; $('directPanel').classList.toggle('hidden',group); $('groupPanel').classList.toggle('hidden',!group); });
+  pollTimer = setInterval(async () => { if (document.hidden) return; try { await loadConversations(); if (activeId) await loadMessages(false); } catch {} }, 2500);
+}
+(async () => { await init(); })().catch(() => location='/login.html');
