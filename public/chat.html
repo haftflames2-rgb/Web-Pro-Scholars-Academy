@@ -1,0 +1,24 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Chat | WPS Academy</title><link rel="stylesheet" href="/css/style.css"></head>
+<body class="chat-page"><header class="nav"><a class="brand" href="/">WPS <span>Academy</span></a><nav><a id="backPortal" href="/student.html">Portal</a><button id="logout" class="btn small">Sign Out</button></nav></header>
+<main class="chat-shell">
+  <aside class="chat-sidebar">
+    <div class="chat-sidebar-top"><div><b>Chats</b><small id="chatUser"></small></div><button id="newChatBtn" class="chat-icon-btn" title="New chat">＋</button></div>
+    <div class="chat-search"><input id="chatSearch" placeholder="Search chats"></div>
+    <div id="conversationList" class="chat-list"><div class="chat-empty">Loading chats…</div></div>
+  </aside>
+  <section class="chat-main">
+    <div id="chatWelcome" class="chat-welcome"><div class="chat-big-icon">💬</div><h1>WPS Academy Chat</h1><p>Message classmates, instructors and administrators from inside the academy.</p><button id="startChatBtn" class="btn">Start a chat</button></div>
+    <div id="chatRoom" class="chat-room hidden">
+      <div class="chat-room-head"><button id="mobileBack" class="chat-back">‹</button><div class="chat-avatar" id="roomAvatar">W</div><div class="chat-room-title"><b id="roomTitle">Chat</b><small id="roomMeta"></small></div></div>
+      <div id="messageList" class="message-list"></div>
+      <div id="attachmentPreview" class="chat-attachment-preview hidden">
+        <div class="chat-attachment-preview-head"><div><b>Attachment ready to send</b><small id="attachmentPreviewMeta"></small></div><button type="button" id="cancelAttachmentBtn" class="chat-preview-cancel" title="Remove attachment">×</button></div>
+        <div id="attachmentPreviewMedia" class="chat-attachment-preview-media"></div>
+        <div id="attachmentPreviewName" class="chat-attachment-preview-name"></div>
+      </div>
+      <form id="messageForm" class="chat-composer"><input id="fileInput" type="file" class="hidden" accept="image/*,video/*,audio/*,.docx" capture="environment"><div id="recordingPanel" class="chat-recording-panel hidden"><div class="chat-recording-top"><span class="chat-recording-dot"></span><span id="recordingStatus">Record a voice message</span><span id="recordingTime">00:00</span></div><div id="voicePreview" class="chat-voice-preview hidden"><span id="voiceReadyLabel">🎙️ Voice note ready to send</span><button type="button" id="deleteVoiceBtn" class="chat-delete-voice" title="Delete recording">🗑️ Delete</button><audio id="voicePreviewAudio" preload="none"></audio></div></div><button type="button" id="attachBtn" class="chat-attach-btn" title="Send image, video, audio or DOCX">📎</button><button type="button" id="recordAudioBtn" class="chat-attach-btn" title="Record audio">🎙️</button><textarea id="messageInput" rows="1" maxlength="5000" placeholder="Type a message…"></textarea><button id="chatSend" class="chat-send" title="Send">➤</button></form>
+    </div>
+  </section>
+</main>
+<div id="newChatModal" class="chat-modal hidden"><div class="chat-dialog"><button id="closeChatModal" class="tool-close">×</button><h2>New chat</h2><div class="chat-tabs"><button class="chat-tab active" data-tab="direct">Direct chat</button><button class="chat-tab" data-tab="group">Create group</button></div><div id="directPanel"><input id="userSearch" class="chat-full-input" placeholder="Search people"><div id="userList" class="chat-user-list"></div></div><form id="groupPanel" class="hidden"><input id="groupName" class="chat-full-input" placeholder="Group name" maxlength="80" required><p class="chat-help">Select people to add to the group.</p><div id="groupUserList" class="chat-user-list"></div><button class="btn full" type="submit">Create group</button></form></div></div>
+<script src="/js/chat.js?v=20260921whatsapp3"></script></body></html>
