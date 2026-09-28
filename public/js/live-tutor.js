@@ -1,0 +1,90 @@
+let recognition=null, running=false, busy=false, audioSource=null, audioCtx=null;
+const statusEl=document.getElementById('liveStatus'), transcript=document.getElementById('liveTranscript'), orb=document.getElementById('liveOrb');
+function api(url,opts={}){return fetch(url,opts).then(async r=>{let d={};try{d=await r.json()}catch{};if(!r.ok)throw new Error(d.error||'Request failed');return d;});}
+function setState(text, cls=''){statusEl.textContent=text;orb.className='live-orb '+cls;}
+async function unlockAudio(){
+  if(!audioCtx){const C=window.AudioContext||window.webkitAudioContext;if(C)audioCtx=new C();}
+  if(audioCtx&&audioCtx.state==='suspended')await audioCtx.resume();
+}
+async function speakWithBrowserSynthesis(text){
+  if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window))throw new Error('This browser does not provide a voice fallback.');
+  const synth=window.speechSynthesis;synth.cancel();
+  const raw=String(text||'').replace(/\s+/g,' ').trim();if(!raw)return;
+  const chunks=[];let rest=raw;
+  while(rest.length>1200){let cut=Math.max(rest.lastIndexOf('. ',1200),rest.lastIndexOf('? ',1200),rest.lastIndexOf('! ',1200),rest.lastIndexOf(', ',1200));if(cut<500)cut=1200;chunks.push(rest.slice(0,cut+1).trim());rest=rest.slice(cut+1).trim();}
+  if(rest)chunks.push(rest);
+  let voices=synth.getVoices();
+  if(!voices.length){await new Promise(resolve=>{const timer=setTimeout(resolve,250);synth.onvoiceschanged=()=>{clearTimeout(timer);resolve()};});voices=synth.getVoices();}
+  const voice=voices.find(v=>/^en(-|_)/i.test(v.lang))||voices.find(v=>v.default)||null;
+  for(const chunk of chunks){await new Promise(resolve=>{const u=new SpeechSynthesisUtterance(chunk);u.lang=voice?.lang||'en-US';u.rate=.98;u.pitch=1;if(voice)u.voice=voice;u.onend=resolve;u.onerror=e=>{console.warn('Browser speech synthesis error:',e?.error||e);resolve()};synth.speak(u);});}
+}
+
+async function playSpeech(text){
+  await unlockAudio();
+  const speechText=String(text).replace(/[*_`#>\[\]()]/g,'').slice(0,4096);
+  const r=await fetch('/api/ai/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:speechText})});
+  if(!r.ok){let msg='Voice generation failed.';try{const d=await r.json();msg=d.error||msg}catch{}throw new Error(msg);}
+  const contentType=(r.headers.get('content-type')||'').toLowerCase();
+  if(contentType.includes('application/json')){
+    const d=await r.json();
+    if(d.fallback){
+      if(!('speechSynthesis' in window))throw new Error('This browser does not provide a voice fallback.');
+      await speakWithBrowserSynthesis(d.text||speechText);
+      return;
+    }
+  }
+  const data=await r.arrayBuffer();
+  if(audioCtx){
+    try{
+      const decoded=await audioCtx.decodeAudioData(data.slice(0));
+      if(audioSource){try{audioSource.stop()}catch{}audioSource=null;}
+      const source=audioCtx.createBufferSource();source.buffer=decoded;source.connect(audioCtx.destination);audioSource=source;
+      await new Promise((resolve,reject)=>{source.onended=()=>{if(audioSource===source)audioSource=null;resolve()};try{source.start()}catch(e){reject(e)}});
+      return;
+    }catch(decodeError){
+      console.warn('WPS Live Tutor Web Audio decode failed; using HTMLAudioElement fallback.', decodeError);
+    }
+  }
+  const blob=new Blob([data],{type:'audio/mpeg'});const url=URL.createObjectURL(blob);const a=new Audio(url);a.preload='auto';
+  try{await a.play();await new Promise(resolve=>{a.onended=resolve;a.onerror=resolve})}finally{URL.revokeObjectURL(url)}
+}
+async function ask(text){
+ busy=true;setState('Thinking…','thinking');transcript.innerHTML=`<b>You:</b> ${escapeHtml(text)}<br><br><b>WPS AI:</b> Thinking…`;
+ try{
+  const fd=new FormData();fd.append('message',text);
+  const d=await api('/api/ai/chat',{method:'POST',body:fd});
+  const answer=String(d?.message?.content||'').trim();
+  if(!answer) throw new Error('The AI returned an empty answer.');
+  // The AI answer is the primary result. Speech playback is a separate layer;
+  // a voice/browser problem must never replace a successful answer with Error.
+  transcript.innerHTML=`<b>You:</b> ${escapeHtml(text)}<br><br><b>WPS AI:</b> ${escapeHtml(answer).replace(/\n/g,'<br>')}`;
+  setState('Speaking…','speaking');
+  try{
+   await playSpeech(answer);
+   setState('Listening…','listening');
+  }catch(voiceError){
+   console.warn('WPS Live Tutor voice playback warning:', voiceError);
+   setState('Answer ready — voice playback issue','speaking');
+  }
+ }catch(e){
+  transcript.innerHTML=`<b>Error:</b> ${escapeHtml(e.message)}`;
+  setState('Error');
+ }
+ busy=false;if(running)startListening();
+}
+function startListening(){
+ if(!running||busy)return;const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){setState('Your browser does not support live speech recognition.');return;}
+ recognition=new SR();recognition.lang='en-US';recognition.interimResults=false;recognition.continuous=false;
+ recognition.onstart=()=>setState('Listening…','listening');
+ recognition.onresult=e=>{const text=e.results[0][0].transcript.trim();if(text)ask(text)};
+ recognition.onerror=e=>{if(running&&!busy){setState('Microphone issue: '+e.error);setTimeout(startListening,1000)}};
+ recognition.onend=()=>{recognition=null;if(running&&!busy)setTimeout(startListening,250)};
+ try{recognition.start()}catch{}
+}
+function stop(){running=false;if(recognition){try{recognition.stop()}catch{}recognition=null}if(audioSource){try{audioSource.stop()}catch{}audioSource=null}if(audioCtx){try{audioCtx.suspend()}catch{}}speechSynthesis?.cancel();setState('Stopped');document.getElementById('startLive').disabled=false;document.getElementById('stopLive').disabled=true;}
+document.addEventListener('pointerdown', ()=>{try{window.speechSynthesis?.getVoices()}catch{}},{passive:true});
+document.getElementById('startLive').onclick=async()=>{if(running)return;running=true;document.getElementById('startLive').disabled=true;document.getElementById('stopLive').disabled=false;try{await unlockAudio()}catch{}try{if('speechSynthesis' in window){const warm=new SpeechSynthesisUtterance('');warm.volume=0;window.speechSynthesis.speak(warm)}}catch{}const topic=document.getElementById('liveTopic').value.trim();if(topic)ask(topic);else startListening();};
+document.getElementById('stopLive').onclick=stop;
+document.getElementById('logout').onclick=async()=>{stop();await fetch('/api/logout',{method:'POST'});location='/'};
+function escapeHtml(t){return String(t).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+(async()=>{try{const d=await api('/api/me');if(!d.user)location='/login.html';}catch{location='/login.html';}})();
