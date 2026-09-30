@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Teach on WPS Academy</title><link rel="stylesheet" href="/css/style.css"></head>
+<body class="auth-page"><div class="auth-card"><a class="brand" href="/">WPS <span>Academy</span></a><h1>Teach on WPS Academy</h1>
+<p>Create and manage your own courses, lessons, assignments and students after administrator approval.</p>
+<div id="status" class="application-status" role="status" aria-live="polite" aria-atomic="true"></div><form id="applyForm"><label>What do you want to teach?<textarea id="teachingTopics" maxlength="1000" required placeholder="e.g. Python, web development, graphic design..."></textarea></label><label>Tell the administrator about your teaching plan<textarea id="message" maxlength="2000" required placeholder="Briefly describe your experience and the course you want to create."></textarea></label><button class="btn full">Submit Instructor Application</button></form>
+<p><a href="/login.html">Login</a> · <a href="/">Back to WPS Academy</a></p></div><script>
+async function api(u,o={}){const r=await fetch(u,{credentials:'same-origin',...o});let d={};try{d=await r.json()}catch{};if(!r.ok)throw Error(d.error||'Request failed');return d}
+function showStatus(type,title,message){const el=document.getElementById('status');el.className='application-status '+type;el.innerHTML='<strong>'+title+'</strong><span>'+message+'</span>';el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+(async()=>{try{const me=await api('/api/me');if(!me.user){showStatus('error','Login required','Please log in first, then return to this page.');document.getElementById('applyForm').style.display='none';return}
+const s=await api('/api/instructor/status');if(s.approved){location='/instructor.html';return}
+if(s.application?.status==='pending'){showStatus('success','Application already submitted','Your instructor application is currently awaiting administrator review.');document.getElementById('applyForm').style.display='none';return;}
+if(s.application?.status==='rejected')showStatus('error','Previous application not approved','You may submit a new instructor application.');
+}catch(e){showStatus('error','Could not check application status',e.message||'Please refresh the page and try again.')}})();
+
+document.getElementById('applyForm').onsubmit=async e=>{e.preventDefault();const form=e.currentTarget;const statusEl=document.getElementById('status');const topicsEl=document.getElementById('teachingTopics');const messageEl=document.getElementById('message');const submitBtn=form.querySelector('button[type=submit],button');const topics=topicsEl.value.trim();const message=messageEl.value.trim();
+if(!topics||!message){showStatus('error','Incomplete application','Please complete both required sections before submitting.');return;}
+submitBtn.disabled=true;submitBtn.textContent='Submitting...';showStatus('loading','Submitting application','Please wait while we save your application. Do not close this page.');
+try{const d=await api('/api/instructor/apply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({teachingTopics:topics,message})});
+// The API only returns success after the server has verified the database write.
+showStatus('success','Application submitted successfully','Your instructor application has been received and saved. It is now awaiting administrator review.');
+form.reset();form.style.display='none';
+}catch(e){showStatus('error','Application was not submitted',e.message||'We could not save your application. Please try again.');submitBtn.disabled=false;submitBtn.textContent='Submit Instructor Application';}};
+</script></body></html>
