@@ -1,0 +1,7 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login | SMARTTEP ACADEMY</title><link rel="stylesheet" href="/css/style.css"></head>
+<body class="auth-page"><div class="auth-card"><a class="brand" href="/" aria-label="SMARTTEP ACADEMY"><img class="brand-logo" src="/images/smarttep-academy-logo.png" alt="SMARTTEP ACADEMY"><span>SMARTTEP ACADEMY</span></a>
+<h1>Welcome back</h1><p>Login to continue learning.</p>
+<form id="loginForm"><label>Email<input id="email" type="email" required></label><label>Password<input id="password" type="password" required></label>
+<button class="btn full">Login</button></form><div id="twoFactorBox" hidden><hr><h2>Admin verification</h2><p>Enter the 6-digit code from your authenticator app.</p><label>Authenticator code<input id="twoFactorCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}"></label><button class="btn full" id="verifyTwoFactor">Verify 2FA</button><p><button class="ghost-btn small" type="button" id="useRecoveryCode">Use a recovery code</button></p></div><p id="msg" class="msg"></p><p>New here? <a href="/register.html">Create an account</a></p></div>
+<script src="/js/auth.js"></script></body></html>
