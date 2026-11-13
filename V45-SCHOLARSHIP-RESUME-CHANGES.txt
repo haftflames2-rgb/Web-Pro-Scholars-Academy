@@ -1,0 +1,11 @@
+SMARTTEP ACADEMY V45 — SCHOLARSHIP RESUME FIX
+
+Changes from V44:
+- Existing pending applications are recognized by the same email instead of returning only a duplicate-application error.
+- If the application fee is unpaid, the applicant is directed back to the existing payment page using the saved application ID.
+- The Check Application Status form now displays a Continue to Payment link for pending applications whose payment proof has not been submitted.
+- Applicants who have already submitted payment proof are told to wait for Admin verification rather than being directed to pay again.
+- Incomplete payment URLs explain how to recover through the status checker without refilling the application.
+- Existing scholarship application records and all other site files are preserved. No database migration or new environment variable is required.
+
+Important limitation: recovery uses the application email and existing rate limits; it does not prove that the person entering the email owns that mailbox. A one-time email code would require an email delivery service/configuration.
