@@ -1,0 +1,33 @@
+SMARTTEP ACADEMY V48 - EXAM STRUCTURE AND SMART SECURITY FIX
+Based on: SMARTTEP-ACADEMY-V47-REFERRAL-PROGRAMME-BASED-ON-V45.zip
+
+Changes made:
+- Server now rejects exam submissions after the official deadline; the student-side countdown automatically attempts submission at zero.
+- Fixed unanswered objective questions being interpreted as option A due to JavaScript Number(null) conversion.
+- Added per-exam security policy selection for Admin and Instructor at exam creation and editable controls for existing exams:
+  * Lock after hidden grace period (default)
+  * Record event and send for Admin review without automatic lock
+  * Monitor only (record event without warning/lock)
+- Added configurable hidden grace period, default 15 seconds (allowed 5-60 seconds). Students do not see a countdown.
+- Exam tab/page visibility events are recorded first. In default lock-after-grace mode, the student can return before the deadline to cancel the pending lock. If they do not return, a server-side MongoDB-backed sweep applies the lock after the grace deadline and flags the attempt for Admin review.
+- Pending security events survive server restarts because events and deadlines are stored in MongoDB. The sweep resumes processing when the server runs again.
+- Added student-facing warning/review messages and improved Admin event status labels.
+- Added optional exam opening/closing date-time controls to Admin and Instructor exam creation.
+- Theory marks must all be entered explicitly before saving; zero remains a valid mark. Results show theory marking as Pending or Marked.
+- Added explicit server rejection of submissions for locked attempts.
+
+Important limitations:
+- Browser visibility events are not proof of cheating. Mobile OS calls, notifications, app switching and browser behavior can trigger them. Use Review or Monitor mode for high-stakes exams if false positives are unacceptable.
+- The hidden 15-second grace is enforced by the server while the Render service is running. If the service restarts during the exact grace window, pending events are processed after it comes back online; enforcement is not guaranteed at the exact millisecond during downtime.
+- The browser cannot reliably detect every external device, screenshot, or second phone.
+- Automatic submission at timer zero is best-effort from the browser; the server is authoritative and rejects late submissions. If a student's connection fails at the deadline, they may need Admin review.
+- No new environment variables or paid service is required. Existing MongoDB connection is used to persist pending security events.
+
+Checks run:
+- node --check server.js
+- node --check public/js/student.js
+- node --check public/js/admin.js
+- node --check public/js/instructor.js
+- ZIP integrity test
+
+Not performed: live Render deployment or end-to-end testing with real student/Admin accounts.

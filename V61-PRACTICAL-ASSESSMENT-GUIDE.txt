@@ -1,0 +1,32 @@
+SMARTTEP ACADEMY V61 — PRACTICAL ASSESSMENT & SUBMISSION HISTORY
+
+V61 is built from the V60 project and preserves the existing exam system.
+
+NEW FEATURES
+1. Admins and instructors can create practical tasks, projects, or written assignments.
+2. Assignment setup supports a course, title, detailed instructions, due date, maximum points (1–1000), and up to 12 marking criteria (one per line).
+3. Students can submit written/code work and/or an allowed project file.
+4. Students can resubmit before the deadline. The current submission replaces the active version for marking; up to the last 10 submission snapshots are retained in MongoDB.
+5. Instructors can review submitted code/text, download the attachment, see recent submission history, enter a numeric score within the assignment maximum, and provide feedback.
+6. Admins can also inspect and grade submissions with a numeric score and feedback.
+7. Students see submission status, attempt count, grade, score, marking criteria, and instructor feedback.
+
+EXISTING EXAMINATION SYSTEM
+- Objective exam questions created by admins/instructors remain automatically marked.
+- Theory exam answers remain manually marked.
+- Existing exam attempts, security settings, warnings and incident handling are preserved.
+- V61 does not create a duplicate objective exam engine.
+
+DATA & COMPATIBILITY
+- Existing assignments and submissions remain readable. Legacy assignments default to practical type and 100 points for display.
+- Existing submission records are retained. New resubmissions append a history snapshot, retaining at most 10 snapshots per submission record.
+- No new environment variables, npm packages, paid services, or external accounts are required.
+- Existing MongoDB, Cloudinary, Render settings and NIN_ENCRYPTION_KEY must be retained.
+
+LIMITATIONS / NOTES
+- Practical work is still assessed by a human instructor/admin; this release does not execute or automatically grade arbitrary student code.
+- Uploaded code is stored as a submission file; it is not run on the SMARTTEP server.
+- The existing upload pipeline and allowed file types remain in force.
+- Due dates are enforced on submission. Students who miss a deadline must contact their instructor/admin for an extension or alternate arrangement.
+- Up to 10 historical submission versions are retained in each submission document. This is not a full audit archive of every individual keystroke.
+- Runtime behavior against live Render/MongoDB/Cloudinary must be checked after deployment.

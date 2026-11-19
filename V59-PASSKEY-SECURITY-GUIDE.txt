@@ -1,0 +1,31 @@
+SMARTTEP ACADEMY V59 — PASSKEY / DEVICE BIOMETRIC LOGIN
+
+WHAT THIS ADDS
+- Students, instructors and moderators can register a passkey from their own dashboard using the Passkeys link.
+- On supported devices, the browser asks for the device's built-in user verification: fingerprint, face recognition, or device PIN.
+- Users can sign in from the login page using their email and registered passkey.
+- Users can list and remove their own registered passkeys.
+- Passkey challenges expire after five minutes and verification is performed on the server.
+- Passkey registration/removal/login events are recorded in the existing security event log.
+
+PRIVACY
+SMARTTEP does not receive or store a fingerprint, face image, or biometric template. The device's authenticator performs local verification and returns a signed WebAuthn response. A device PIN may be offered by the operating system as a fallback.
+
+ACCOUNT COVERAGE / LIMITATIONS
+- Passkeys are enabled for students, instructors and moderators.
+- Admin accounts continue to use the existing password + Admin 2FA flow. This upgrade does not weaken or replace Admin 2FA.
+- Passkeys are optional. Keep the account password and recovery method available.
+- A passkey belongs to a device/platform credential or synced passkey provider; users should register another device before removing their only passkey.
+- Requires HTTPS and a current browser/device supporting WebAuthn platform authenticators. localhost is suitable for development; ordinary insecure HTTP hosting is not.
+- SMARTTEP cannot guarantee that every device has fingerprint or face hardware. The operating system may use a device PIN instead.
+
+DEPLOYMENT
+- No new environment variables.
+- No new paid account or subscription.
+- One free open-source npm dependency was added: @simplewebauthn/server. Render installs it during the normal npm install/build process.
+- No new database account. A new MongoDB collection named passkeys is created automatically and indexed on credentialId.
+- No Cloudinary changes.
+- Keep the existing NIN_ENCRYPTION_KEY unchanged.
+
+TESTING NOTES
+Source syntax and ZIP integrity are checked. A real passkey ceremony must still be tested after Render deploys because it depends on the deployed HTTPS origin, browser, device authenticator and npm dependency installation. Do not treat syntax checks as a live biometric-device test.
