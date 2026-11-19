@@ -1,0 +1,11 @@
+(async function(){
+  const main=document.querySelector('main'); if(!main)return;
+  try{
+    const r=await fetch('/api/nin/status'); if(!r.ok)return; const d=await r.json(); if(!d.required)return;
+    const box=document.createElement('section'); box.className='panel nin-portal-panel';
+    if(d.submitted){box.innerHTML='<h2>Identity record</h2><p>Your NIN has been securely submitted to SMARTTEP ACADEMY. It is not displayed in your portal, ID card or public verification profile.</p><p><b>Submission status:</b> '+(d.status==='admin_checked'?'Admin checked':d.status==='verification_issue'?'Needs further review':'Submitted')+'</p>';}
+    else {box.innerHTML='<h2>Complete your SMARTTEP identity record</h2><p>Your NIN is required to help prevent duplicate academy accounts. Your 30-day submission period '+(d.overdue?'has ended. Submit it to restore full portal access.':'is active. Please submit it before '+(d.dueAt?new Date(d.dueAt).toLocaleDateString():'the deadline')+'.')+' Only authorised Admin can view your NIN. It will not appear on your ID card or public verification profile.</p><form id="ninSubmitForm"><label>11-digit NIN<input name="nin" type="password" inputmode="numeric" pattern="[0-9]{11}" minlength="11" maxlength="11" autocomplete="off" required></label><label class="check"><input type="checkbox" name="ninConsent" required> I confirm this NIN belongs to me and consent to SMARTTEP storing it securely for academy account uniqueness and identity checks.</label><button class="btn">Submit NIN securely</button><span id="ninSubmitMsg" class="msg"></span></form>';}
+    main.prepend(box);
+    const form=box.querySelector('#ninSubmitForm'); if(form)form.addEventListener('submit',async e=>{e.preventDefault();const msg=box.querySelector('#ninSubmitMsg'),nin=form.elements.nin.value.trim();msg.textContent='Submitting securely…';try{const resp=await fetch('/api/nin/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nin,ninConsent:true})});const data=await resp.json();if(!resp.ok)throw Error(data.error||'Submission failed.');msg.textContent=data.message||'Submitted.';form.reset();setTimeout(()=>location.reload(),700);}catch(err){msg.textContent=err.message;}});
+  }catch(e){console.warn('NIN status could not be loaded.');}
+})();
