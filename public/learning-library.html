@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Free Technology Learning Library | SMARTTEP ACADEMY</title>
+  <meta name="description" content="Explore practical, beginner-friendly guides on AI, web development, Python, cybersecurity, app development, data science and more at SMARTTEP ACADEMY.">
+  <link rel="canonical" href="/learning-library.html"><meta name="robots" content="index,follow">
+  <link rel="stylesheet" href="/css/style.css"><link rel="manifest" href="/manifest.webmanifest">
+  <style>
+    .library-hero{padding:2.2rem;border-radius:18px;background:linear-gradient(125deg,#102b4e,#176b87);color:#fff;margin-bottom:1.5rem}
+    .library-hero h1{font-size:clamp(2rem,5vw,3rem);margin:.2rem 0 .7rem}.library-hero p{max-width:760px;line-height:1.7;color:#e6f4ff}
+    .library-tools{display:grid;grid-template-columns:minmax(0,2fr) minmax(180px,1fr);gap:1rem;margin:1.3rem 0}
+    .library-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:1rem}
+    .article-card{display:flex;flex-direction:column;gap:.65rem;padding:1.2rem;border:1px solid var(--border,#dbe3ec);border-radius:14px;background:var(--panel,#fff);min-height:250px}
+    .article-card h2{font-size:1.2rem;line-height:1.4;margin:0}.article-card p{line-height:1.65;flex:1}.article-meta{font-size:.84rem;opacity:.78}.article-tags{display:flex;flex-wrap:wrap;gap:.35rem}.article-tag{font-size:.75rem;border:1px solid var(--border,#dbe3ec);border-radius:20px;padding:.2rem .55rem}
+    .library-empty{padding:2rem;text-align:center;border:1px dashed var(--border,#ccd5df);border-radius:12px}
+    @media(max-width:650px){.library-tools{grid-template-columns:1fr}.library-hero{padding:1.3rem}}
+  </style>
+</head>
+<body>
+<header class="nav"><a class="brand" href="/"><img class="brand-logo" src="/images/smarttep-academy-logo.png" alt="SMARTTEP ACADEMY"><span>SMARTTEP ACADEMY</span></a><nav><a href="/">Home</a><a href="/about.html">About</a><a href="/login.html">Login</a></nav></header>
+<main class="section">
+  <section class="library-hero"><p><strong>LEARN · BUILD · GROW</strong></p><h1>SMARTTEP Learning Library</h1><p>Clear, practical technology lessons for curious beginners and growing professionals. Explore concepts, follow examples, practise new skills and keep building your confidence.</p></section>
+  <p>Browse original learning guides from SMARTTEP ACADEMY. Articles are educational resources and do not replace professional advice or hands-on practice. Automobile Mechanic content is not included in this library.</p>
+  <div class="library-tools"><label>Search the library<input id="librarySearch" type="search" placeholder="Try Python, cybersecurity, responsive design…" autocomplete="off"></label><label>Filter by course<select id="libraryCourse"><option value="">All available courses</option></select></label></div>
+  <p id="libraryCount" class="article-meta" aria-live="polite">Loading articles…</p>
+  <div id="libraryArticles" class="library-grid" aria-live="polite"></div>
+</main>
+<footer class="section"><p class="article-meta">SMARTTEP ACADEMY · Practical education for complete beginners becoming work-ready professionals.</p></footer>
+<script src="/js/learning-library.js?v=63" defer></script>
+</body></html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Passkey Security | SMARTTEP ACADEMY</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .passkey-wrap{max-width:760px;margin:36px auto;padding:0 16px}.passkey-card{background:#fff;border:1px solid #e5e7eb;border-radius:16px;padding:24px;margin:16px 0;box-shadow:0 8px 28px rgba(0,0,0,.05)}
+    .passkey-card h1,.passkey-card h2{margin-top:0}.passkey-list{display:grid;gap:10px}.passkey-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px;border:1px solid #e5e7eb;border-radius:10px}.passkey-muted{color:#64748b;font-size:.94rem}.passkey-actions{display:flex;gap:10px;flex-wrap:wrap}.passkey-danger{background:#fff;color:#b91c1c;border:1px solid #fecaca}
+  </style>
+</head>
+<body class="auth-page">
+  <main class="passkey-wrap">
+    <section class="passkey-card">
+      <a class="brand" href="/" aria-label="SMARTTEP ACADEMY"><img class="brand-logo" src="/images/smarttep-academy-logo.png" alt="SMARTTEP ACADEMY"><span>SMARTTEP ACADEMY</span></a>
+      <h1>Passkey security</h1>
+      <p>Register this device so you can sign in using its built-in fingerprint, face recognition or device PIN.</p>
+      <p class="passkey-muted"><strong>Your biometric data stays on your device.</strong> SMARTTEP receives a cryptographic confirmation from your device; it does not receive or store your fingerprint or face image. A compatible device and a secure HTTPS connection are required.</p>
+      <div class="passkey-actions"><button class="btn" id="addPasskey">Register this device</button><a class="ghost-btn" href="/student.html" id="dashboardLink">Return to dashboard</a></div>
+      <p id="passkeyMsg" class="msg" role="status" aria-live="polite"></p>
+    </section>
+    <section class="passkey-card">
+      <h2>Your registered devices</h2>
+      <div id="passkeyList" class="passkey-list">Loading registered devices…</div>
+    </section>
+    <p class="passkey-muted">Keep your password available as a fallback. Admin accounts continue to use password and the existing Admin 2FA. Passkeys are optional and can be removed here.</p>
+  </main>
+  <script src="/js/passkeys.js"></script>
+</body>
+</html>
