@@ -1,0 +1,28 @@
+SMARTTEP ACADEMY V57 — Identity, Course Statistics & Community
+
+Built on V56. Existing course, payment, referral, exam, security, advertising, scholarship, instructor, moderator and learning features are retained.
+
+NIN
+- New student registrations require an 11-digit NIN and consent.
+- Existing student/instructor/moderator accounts receive a 30-day submission period.
+- NIN is encrypted with AES-256-GCM and duplicate-checked using a keyed HMAC-SHA-256 fingerprint.
+- A unique MongoDB partial index prevents duplicate fingerprints during simultaneous registrations.
+- Only the admin users endpoint returns the decrypted NIN. User portals, public verification and identity cards do not expose it.
+- Admin can copy the NIN and record Submitted, Admin checked or Verification issue. This is academy-managed; no automated NIMC connection is included.
+
+COURSE STATISTICS
+- Homepage course cards and admin course list show approved student enrolment counts.
+
+COMMUNITY
+- Homepage feed supports academy updates, training, achievements, reviews and testimonies.
+- Students, instructors, moderators and admins can submit posts with optional photos/videos. Non-admin posts await approval. Signed-in members can report unsuitable posts.
+- Admin can approve, reject, delete and reply.
+- Media uses existing Cloudinary credentials.
+
+DEPLOYMENT
+- Add NIN_ENCRYPTION_KEY to Render. It must be 64 hexadecimal characters. Generate on Windows with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+- Keep the key private and backed up. Never rotate it casually; losing/changing it makes stored NIN records undecryptable and breaks consistent duplicate detection.
+- The existing-user 30-day timer starts only after the encryption key is configured.
+- No new paid account, subscription, npm dependency or Cloudinary account is required.
+
+Testing note: source syntax and archive integrity are checked locally. Live MongoDB, Render, Cloudinary and browser workflows have not been tested from this environment.

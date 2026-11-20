@@ -1,0 +1,17 @@
+SMARTTEP ACADEMY V67 DEPLOYMENT GUIDE
+
+1. Back up your current GitHub repository and download a copy of your current deployment files.
+2. Extract the V67 ZIP on your computer.
+3. Upload/replace the project files in the same GitHub repository, preserving your existing environment variables in Render.
+4. Commit the changes. If Render is connected to GitHub for automatic deploys, wait for the deployment to finish. Otherwise trigger a manual deploy.
+5. Sign in using a student test account and open Student Portal > My Personalized Learning Path.
+6. Save a goal, weekly hours and pace. Refresh the page and confirm the preferences remain saved.
+7. Complete one available lesson, refresh the plan and confirm that lesson no longer appears in the remaining plan.
+8. Test with a locked lesson and confirm it appears under the locked section, not as an available task.
+
+Environment variables: no new variables are required. Keep all existing variables unchanged.
+Database: MongoDB creates the student_learning_path_preferences collection and unique studentId index when the server starts. Existing course and lesson data are read only.
+
+Rollback: restore your backed-up prior project files and redeploy. Do not delete existing MongoDB collections.
+
+Important: local syntax and archive checks are not a substitute for testing on your live Render service. Test with a student account before announcing this feature to all students.

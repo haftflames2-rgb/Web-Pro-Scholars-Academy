@@ -1,0 +1,33 @@
+SMARTTEP ACADEMY V70 — RELIABILITY, SECURITY & SYSTEM AUDIT
+
+Built on the V69 project archive. This upgrade combines a static project audit with targeted reliability fixes and an admin-only operational diagnostics panel.
+
+AUDIT FINDINGS AND FIXES
+1. Critical admin-page script markup issue: the scholarship-admin.js script element was missing its closing tag before the V69 analytics script. This could prevent subsequent scripts from loading correctly in browsers. Fixed the script sequence and added the V70 diagnostics script.
+2. V69 analytics memory/performance issue: the previous endpoint loaded every completed lesson-progress row and every submitted exam attempt into Node.js memory, then filtered progress in application code. Reworked the endpoint to use database counts and scoped queries instead of loading the full progress history.
+3. Analytics bounds: reporting periods are restricted to 7, 30 or 90 days. Course insight processing is capped at 500 courses, 2,000 lessons per course, 10,000 scored attempts and 20,000 recent registration rows. These limits avoid unbounded in-process work; very large academies should use dedicated paginated/background reporting later.
+4. Completion percentage is capped at 100% so duplicate legacy progress rows cannot display a percentage above 100.
+5. Added GET /api/admin/system-audit-v70 protected by auth + admin middleware (including the existing admin 2FA enforcement). It checks MongoDB ping, presence/format of key configuration, admin 2FA status and optional LiveKit configuration. It never returns secret values.
+6. Added an admin portal System Reliability & Security Audit panel with a manual refresh action and a clear explanation that configuration checks are not end-to-end tests.
+
+SECURITY AND PRESERVATION
+- Existing admin middleware and admin 2FA are reused; no new authentication scheme was added.
+- Existing CSRF protections, session configuration, NIN encryption, passkeys, course permissions, payment workflows, AdSense, Cloudinary and LiveKit integrations were not intentionally redesigned.
+- Do not change SESSION_SECRET casually: existing sessions and values encrypted using it (including stored admin 2FA/Web Push private-key material in this project) may become invalid or require recovery.
+- Do not change NIN_ENCRYPTION_KEY: existing encrypted NIN records depend on the original key.
+- Health output shows configuration presence only; it never exposes credentials, NINs, payment proofs or session data.
+
+VALIDATION PERFORMED
+- node --check server.js passed.
+- node --check passed for every public/js/*.js file.
+- package.json parsed successfully.
+- HTML scan found no duplicate IDs across the 34 public HTML files.
+- All local script and stylesheet references found in public HTML resolve to files in public/.
+- Admin page script order verified; scholarship, V69 analytics and V70 diagnostics scripts are separate valid script elements.
+- ZIP integrity test passed.
+
+NOT PERFORMED / LIMITATIONS
+- No live Render deployment, MongoDB Atlas, Cloudinary upload, Paystack payment, email, Web Push delivery, LiveKit room, passkey hardware/browser, or full browser end-to-end test was performed.
+- Static code review is not a formal penetration test or independent security certification.
+- The system audit endpoint does not test actual Cloudinary uploads, payment transactions, email delivery, push delivery, LiveKit room connectivity, backup restoration or scheduled jobs.
+- Existing legacy code may still contain issues not detected by this targeted audit. Test critical user journeys in staging before replacing a live deployment.

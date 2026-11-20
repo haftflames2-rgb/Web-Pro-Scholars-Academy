@@ -1,0 +1,21 @@
+SMARTTEP ACADEMY V68 — LOW-DATA & OFFLINE READINESS
+
+Built on the V67 project ZIP.
+
+WHAT CHANGED
+1. Added a student-portal Low-Data & Offline Tools panel.
+2. Added a user-controlled Data Saver preference, stored locally in that browser. When enabled, existing video elements are set to preload=none; the original preload setting is restored when disabled.
+3. Added /offline.html with a clear offline explanation and safe navigation links.
+4. Updated the existing service worker to precache a small allowlist of public static resources, cache eligible same-origin static assets after successful network requests, and show the offline information page when a navigation request fails.
+5. Retained existing Web Push notification and notification-click handlers.
+6. Explicitly excludes /api/, uploads, and authenticated/dynamic page responses from the cache. Authenticated student pages, private lesson content, exams, payments, live classes and account information are not made available offline.
+
+LIMITATIONS
+- This is offline readiness, not full offline course delivery. Students cannot complete lessons, exams, payments, attendance or live classes without internet.
+- Data Saver prevents HTML video elements from preloading. It does not compress images, rewrite media streams, block advertisements, or guarantee a particular data saving amount.
+- The offline page and static assets become available only after the service worker has installed successfully and the relevant resources have been cached.
+- Browser storage can be cleared by the user/device, and browser support/installation behavior varies.
+
+REQUIREMENTS
+- No new environment variables, accounts, paid services, npm packages or database collections.
+- HTTPS is required for service workers in normal production use; Render's HTTPS deployment qualifies.

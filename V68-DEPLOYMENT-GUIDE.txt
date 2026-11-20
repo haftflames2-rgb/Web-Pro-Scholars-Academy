@@ -1,0 +1,23 @@
+SMARTTEP ACADEMY V68 DEPLOYMENT GUIDE
+
+1. Back up the current GitHub repository and keep a copy of your currently deployed files.
+2. Extract the V68 ZIP and replace the project files in the same GitHub repository. Do not delete existing Render environment variables.
+3. Commit/push the changes and allow Render to deploy, or trigger a manual deploy if auto-deploy is disabled.
+4. Open SMARTTEP in a supported browser while online. Sign in to the Student Portal and allow a short time for the service worker to install and cache the small public static-resource list.
+5. In the Student Portal, find "Low-Data & Offline Tools" and turn Data Saver on. Confirm the button and status message update. Open a page with a video and confirm it does not preload automatically; press play to stream normally.
+6. With the site loaded, temporarily disconnect internet and open/reload a page. A navigation that cannot load should show /offline.html. Reconnect and reload to return to the live portal.
+7. Confirm push notifications still register and work on a supported browser/device. Browser notification permission and HTTPS are required.
+
+SECURITY AND EXPECTATIONS
+- V68 deliberately does not cache student portal HTML, API responses, lesson bodies, exams, payment information, uploaded files or account data.
+- The offline information page is not an offline student portal. A network connection is still required for login and private course activities.
+- Data Saver changes video preload behavior only; it does not block ads or promise a fixed percentage reduction in data usage.
+- First install/cache requires internet. Browser storage may be cleared by the device/browser.
+
+NO NEW ENVIRONMENT VARIABLES, ACCOUNTS, PAID SERVICES, NPM PACKAGES OR DATABASE COLLECTIONS.
+
+ROLLBACK
+Restore your backed-up project files and redeploy. Do not delete MongoDB data.
+
+TESTING NOTE
+Local syntax/archive checks do not prove the feature works on your Render domain or every phone/browser. Test with a student account before announcing it academy-wide.

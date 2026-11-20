@@ -1,0 +1,9 @@
+V64 — LIVE CLASSROOMS
+- Added course-scoped external and built-in live classroom scheduling.
+- Added LiveKit token endpoint with server-side credentials and course enrollment/ownership checks.
+- Added instructor/admin class cancellation and student notifications.
+- Added authenticated recording upload and playback access using existing Cloudinary storage.
+- Added live-classroom links to student, instructor and admin portals.
+- Added LiveKit server SDK dependency and CSP allowances for its browser SDK/CDN and WebRTC connections.
+- No new mandatory environment variables. Three optional LIVEKIT_* variables enable built-in rooms; external meeting links work without them.
+- Recording upload is instructor-managed after class; no automatic server-side room recording is configured.

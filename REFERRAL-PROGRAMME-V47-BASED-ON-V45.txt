@@ -1,0 +1,11 @@
+SMARTTEP ACADEMY — V47 REFERRAL PROGRAMME (based on the uploaded V45 Scholarship Resume ZIP)
+
+This package preserves the uploaded V45 project and adds referral programme files and server routes.
+
+Features: referral tracking, student/instructor/moderator referral dashboards, external-agent applications, Admin approval, commission ledger, and manual bank-transfer payout requests. Scholarship/certificate fees are excluded from referral commission creation.
+
+No new environment variables are required. Keep all existing Render environment variables unchanged.
+
+IMPORTANT: Before public launch, test with a test account and test payment. The existing payment approval route may not always store a numeric paid amount. Percentage commissions therefore attempt to use payment amount fields and otherwise fall back to the enrolled course prices; this fallback needs validation against the academy's real pricing/payment workflow.
+
+Deployment: back up GitHub first, extract this ZIP, upload its contents to the existing repository root, commit and push, then allow the existing Render service to deploy. Do not upload the ZIP file itself as the website source.

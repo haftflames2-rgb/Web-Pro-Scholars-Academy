@@ -1,0 +1,9 @@
+SMARTTEP ACADEMY V65 — STUDENT PORTFOLIO & PROJECT SHOWCASE
+
+- Adds a student-owned project portfolio inside the student portal.
+- Students can save up to 30 projects with title, summary, description, course, skills, live URL and source repository URL.
+- Projects are private by default. Students must deliberately publish a project to create a public share link.
+- Students can edit, make public/private, copy the public link, and delete their own projects.
+- Public portfolio pages expose only published project fields; private projects are not returned by the public endpoint.
+- Does not replace practical assignments or submission history. Portfolio entries are student-curated showcase items.
+- No new packages, environment variables, accounts, paid services or external storage.

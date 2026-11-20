@@ -1,0 +1,23 @@
+SMARTTEP ACADEMY V69 — ADVANCED ACADEMY INTELLIGENCE & ANALYTICS
+
+Built on V68. Adds an admin-only, read-only analytics dashboard using existing MongoDB collections.
+
+Included:
+- Reporting windows: 7, 30 and 90 days.
+- Academy overview: students, approved students, instructors, courses and lessons.
+- Learning activity: completed lesson records and attendance marks.
+- Assessment activity: submitted exams, average percentage score where score/maxScore are available, assignments and recent submissions.
+- New student registrations for the selected period, including daily counts (up to 30 displayed days).
+- Course engagement table and CSV export.
+- Existing V32 course/instructor performance reporting is retained, not replaced.
+
+Technical notes:
+- New route: GET /api/admin/academy-intelligence (admin authentication required).
+- New client script: public/js/v69-analytics.js.
+- No new collections, packages, accounts, paid services or environment variables.
+- Analytics are descriptive counts, not predictive AI or an automated student grading system.
+- Historical records without timestamps may not appear in period-based counts.
+- Completed lesson records are counted across approved students; if legacy records contain duplicate completion rows, the count may exceed unique lessons completed.
+- Average exam score is calculated as the mean of each submitted attempt's score/maxScore percentage; it is not weighted by exam size.
+
+Validation performed: JavaScript syntax, package JSON parse, admin page script insertion, ZIP integrity. No live Render/MongoDB/browser integration test was performed.

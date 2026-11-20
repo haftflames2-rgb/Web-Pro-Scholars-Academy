@@ -1,0 +1,19 @@
+SMARTTEP ACADEMY V49 — STUDENT PORTAL VISIT HISTORY
+
+Built on V48 EXAM SECURITY FIX; intended to preserve the existing V48 features.
+
+Added:
+- A MongoDB student_portal_visits collection records a visit session when a student successfully logs in.
+- Stores login timestamp, explicit logout timestamp where recorded, last-seen timestamp, IP address, and browser user-agent.
+- Existing student activity pings update the session's last-seen timestamp and latest activity IP.
+- Admin > Students now has a Visit History button. It shows the latest 100 sessions with login time, logout/last-seen time, estimated duration, IP, and session status.
+- Visit history API is protected by existing admin authentication and admin 2FA guard.
+- Visit history records are removed when the admin permanently deletes the student account.
+- No new environment variables or paid services are required; it uses the existing MongoDB database.
+
+Important limits:
+- The system cannot reconstruct visits from before V49 is deployed.
+- An explicit logout is recorded only when the student uses the portal's logout action. Browser closure, network loss, or session expiry may not send a logout event. Such durations are estimated from the last recorded activity and are labeled as inferred.
+- Activity timestamp depends on the existing browser activity heartbeat; it is not a keystroke recorder and does not capture every click.
+- IP addresses may change, may be shared by people on the same network, and are not proof of identity or cheating.
+- Tested: JavaScript syntax checks and ZIP integrity. Not live-tested against Render/MongoDB or actual student accounts.

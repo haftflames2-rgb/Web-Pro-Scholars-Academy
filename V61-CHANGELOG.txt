@@ -1,0 +1,11 @@
+SMARTTEP ACADEMY V61 CHANGELOG
+
+- Extended admin/instructor assignment creation with assessment type, maximum points, due date and marking criteria.
+- Added student-facing assignment instructions, criteria, status, attempts, grade and feedback.
+- Added project text/code and file submission validation.
+- Added resubmission support with up to 10 retained submission snapshots.
+- Added instructor view of submitted code/text, download link, recent submission history and numeric scoring.
+- Added admin numeric scoring and submission context.
+- Added deadline enforcement for new submissions.
+- Preserved existing automatic objective exam grading and manual theory marking.
+- No new npm dependencies or environment variables.

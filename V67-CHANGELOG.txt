@@ -1,0 +1,23 @@
+SMARTTEP ACADEMY V67 — PERSONALIZED LEARNING PATHS
+
+Built on V66. Adds a student-facing learning path based on the student's own enrolled courses and lesson-completion records.
+
+Features
+- Student chooses a learning goal: complete enrolled courses, job readiness, practical project skills, or assessment preparation.
+- Student selects weekly study hours (1–20 supported by server; common presets shown) and a study pace.
+- Preferences are saved privately per student in MongoDB.
+- Weekly plan is generated from the student's current unlocked, incomplete lessons.
+- Completed lessons disappear from the remaining plan on refresh; newly available lessons can appear automatically.
+- Locked lessons are shown separately and are never unlocked by this feature.
+- Plan is deterministic and does not use paid AI services or AI credits.
+
+New MongoDB collection: student_learning_path_preferences.
+New API: GET/PUT /api/student/learning-path.
+New client file: public/js/learning-path.js.
+No new packages, environment variables, accounts, or paid services.
+
+Limitations
+- Goal selection currently changes the student's saved planning preference; it does not yet filter course content by career role or generate subject-specific project assignments.
+- The weekly lesson estimate is a planning aid, not a guaranteed completion schedule.
+- It uses existing enrolled course and lesson data; it does not replace instructor teaching, assessments, or course access rules.
+- No live Render/MongoDB/browser integration test has been performed.

@@ -1,0 +1,27 @@
+SMARTTEP ACADEMY V70 — BEGINNER DEPLOYMENT GUIDE
+
+BEFORE YOU START
+1. Open your GitHub repository and make a backup copy or create a backup branch.
+2. Keep your current Render environment variables unchanged.
+3. In particular, do not generate a new SESSION_SECRET or NIN_ENCRYPTION_KEY. Changing either can invalidate existing sessions or encrypted records.
+4. This upgrade adds no new environment variables, accounts, paid services, npm packages or database collections.
+
+DEPLOY
+1. Download and extract SMARTTEP-ACADEMY-V70-RELIABILITY-SECURITY-AUDIT.zip on your computer.
+2. Open the extracted project folder. The files at the top level (including server.js, package.json and public/) are the application. Do not deploy a nested backup folder.
+3. Replace the matching files in your GitHub repository with the V70 files. Keep any repository-specific files that are not part of this project only after checking they do not conflict.
+4. Commit and push the changes to GitHub.
+5. If Render is connected to that repository with Auto-Deploy enabled, wait for deployment to finish. Otherwise deploy manually from Render.
+6. If deployment fails, stop and copy the relevant Render build/runtime error. Do not repeatedly redeploy or change secrets at random.
+
+TEST AFTER DEPLOYMENT
+1. Open SMARTTEP in a browser and sign in as administrator.
+2. Complete admin 2FA if enabled.
+3. Open the Admin Portal and find “System Reliability & Security Audit”. Click “Run system checks”.
+4. Review any warning. A green MongoDB check means the database ping worked; a green Cloudinary check means required settings are present, not that a real upload succeeded.
+5. Open “Academy Intelligence & Analytics”. Confirm the V69 dashboard loads and try 7, 30 and 90-day periods and CSV export.
+6. Separately test student login, instructor/moderator login, course lesson access, assignment submission, exams, notifications, support tickets, certificate flow, scholarship payment review and any live classroom provider you use.
+7. If possible, do these tests on a staging copy before replacing the live site.
+
+IMPORTANT
+The V70 diagnostics panel is not a full automated security scanner, backup system, uptime monitor or proof that all integrations work. It does not create backups or alter student records. Keep an independent database backup process and test restoration separately.

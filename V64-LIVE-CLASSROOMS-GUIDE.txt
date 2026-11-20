@@ -1,0 +1,38 @@
+SMARTTEP ACADEMY V64 — LIVE CLASSROOMS
+
+WHAT IS INCLUDED
+- External class scheduling using approved HTTPS Google Meet, Zoom and Microsoft Teams meeting links.
+- Built-in browser video rooms powered by LiveKit (camera, microphone, participant audio/video, and screen sharing where supported).
+- Course-based permissions: admins manage all courses; instructors manage only courses they own; students can view/join only classes for courses in which they are enrolled and have active portal access.
+- Notifications to enrolled students when a class is scheduled.
+- Instructor/admin cancellation controls.
+- Post-class recording upload to existing Cloudinary storage. Enrolled students and the course instructor/admin can access the recording through an authenticated SMARTTEP endpoint. Upload limit is 100 MB per file; compress or split larger recordings.
+- New /live-classes.html page linked from student, instructor and admin portals.
+
+RENDER ENVIRONMENT VARIABLES FOR BUILT-IN VIDEO
+Add these three values after creating a LiveKit Cloud project:
+LIVEKIT_URL=wss://YOUR-PROJECT.livekit.cloud
+LIVEKIT_API_KEY=your-livekit-api-key
+LIVEKIT_API_SECRET=your-livekit-api-secret
+
+Keep API secret private. Never put it in HTML or share it with students. Built-in rooms remain unavailable until all three values are set. External meeting links work without LiveKit credentials.
+
+ACCOUNTS / COSTS
+- No new Render, MongoDB or Cloudinary account is needed.
+- A LiveKit account/project is required for built-in video. Its free Build plan has usage caps; check the current LiveKit pricing page before using it for regular classes.
+- External Google Meet/Zoom/Teams host accounts are the responsibility of the instructor. Their free plan limits (meeting duration, participants and recording) apply.
+- Recordings are uploaded to the existing Cloudinary account. Existing Cloudinary storage, video-transformation and bandwidth limits apply. This version does not add a new video-storage provider or R2 account.
+- No separate paid recording service is added. Instructors must record the session using a supported meeting recorder or local screen recorder, obtain consent, then upload an MP4/WebM/MOV file (maximum 100 MB per upload). Larger recordings must be compressed or split.
+
+DEPLOYMENT
+1. Replace the existing GitHub repository files with the contents of this ZIP, preserving the project root structure.
+2. Render installs the added livekit-server-sdk dependency during deployment.
+3. Add the three LIVEKIT_* variables in Render to enable built-in video. External meetings can be used without them.
+4. Redeploy and sign in as an admin/instructor to schedule a test class.
+5. Test with two devices and confirm microphone/camera permissions, student enrollment restrictions, notifications and recording upload/playback.
+
+IMPORTANT LIMITATIONS
+- This is an initial classroom implementation, not a full Zoom replacement. It does not yet provide server-side mixed-room recording, attendance auto-marking based on verified join/leave time, breakout rooms, in-room text chat, or classroom moderation controls beyond browser/device controls.
+- Recordings are instructor-uploaded after class. LiveKit Egress-to-object-storage recording is not configured in this version; that would require an additional storage destination and credentials.
+- LiveKit browser SDK is loaded from jsDelivr. The browser must be online and allow access to the CDN and LiveKit WebSocket endpoints.
+- No live Render/MongoDB/LiveKit/Cloudinary integration test was possible in this build environment. Test with a small class before relying on it for teaching.

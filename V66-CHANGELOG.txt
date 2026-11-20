@@ -1,0 +1,28 @@
+SMARTTEP ACADEMY V66 — CAREER DEVELOPMENT CENTRE
+
+Built on V65 Student Portfolio.
+
+New student features:
+- Career Development Centre section in the student portal.
+- Private CV/profile builder with contact details, professional headline, summary, skills, work experience/projects, education, certifications and professional links.
+- CV data saves to the signed-in student's own MongoDB record and loads again on login.
+- Printable CV preview; students can use the browser print dialog's Save as PDF option.
+- Interview preparation questions with guidance on structuring honest, evidence-based answers.
+- Curated external learning and professional profile resources.
+- Basic job-scam safety reminders.
+
+Server:
+- GET /api/student/career-profile
+- PUT /api/student/career-profile
+- New student_career_profiles collection with a unique studentId index.
+- Both endpoints require authentication, student role, and existing studentAccess checks.
+- Responses use Cache-Control: no-store.
+
+No existing V65 features intentionally removed. No new npm packages, environment variables, paid services, or external accounts are required.
+
+Limitations:
+- This is a simple CV builder, not an ATS compatibility checker or professional CV review service.
+- CV PDF output uses the browser's Print / Save as PDF feature; no server-generated PDF file is created.
+- Interview practice is self-guided; it does not include AI voice interviews or automated scoring.
+- Career resource links lead to external services; SMARTTEP does not verify job vacancies or guarantee employment.
+- No live Render, MongoDB, browser or user-account integration test has been performed.

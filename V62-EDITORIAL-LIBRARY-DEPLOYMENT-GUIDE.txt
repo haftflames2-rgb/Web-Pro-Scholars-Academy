@@ -1,0 +1,17 @@
+SMARTTEP ACADEMY V62 — DEPLOYMENT GUIDE
+
+1. Download and extract the V62 ZIP.
+2. Upload the ZIP contents to the existing SMARTTEP GitHub repository, replacing the project files while preserving your repository history.
+3. Commit the changes and let the existing Render service deploy from GitHub.
+4. Do not delete your MongoDB database or existing Cloudinary files.
+5. Do not change or remove existing Render environment variables. V62 adds no new environment variables.
+6. After deployment, open the public Learning Library and check the article list.
+7. The application inserts the original editorial articles into the existing MongoDB articles collection when matching course records exist. If a relevant course is not present, its article is skipped and will be considered on the next application restart after the course is added.
+8. Check /sitemap.xml and confirm that published article URLs appear.
+9. Sign in as Admin and inspect Learning Library — Article Management. Admin can edit or delete editorial articles and continue publishing new articles.
+10. Sign in as an Instructor and confirm the existing own-course article publishing workflow still works.
+
+IMPORTANT
+- Keep your existing NIN_ENCRYPTION_KEY unchanged. Losing or changing it can make previously encrypted NIN records unreadable.
+- Keep SESSION_SECRET and all other existing secrets unchanged.
+- V62 does not guarantee AdSense approval. Review every article for accuracy, originality and usefulness, verify the live website, and submit only when the entire public site complies with current Google policies.

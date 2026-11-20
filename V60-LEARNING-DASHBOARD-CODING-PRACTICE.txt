@@ -1,0 +1,31 @@
+SMARTTEP ACADEMY V60 – LEARNING DASHBOARD & GUIDED CODING PRACTICE
+
+WHAT CHANGED
+1. Student learning dashboard
+   - Displays overall lesson completion percentage.
+   - Shows actual completed lessons, available lessons and enrolled courses.
+   - Shows a progress card for each enrolled course.
+   - Offers a Continue Learning action that opens the selected course lessons.
+   - Shows recent practice quiz scores when quiz attempts exist.
+   - Progress is read from the existing lesson_progress records. It is not fabricated and no existing progress records are reset.
+
+2. Guided coding practice
+   - Adds five starter challenges: HTML profile card, CSS design, JavaScript interaction, JavaScript counter and responsive layout.
+   - Students can select a challenge, edit starter code, run it and reset it.
+   - Preview runs in a sandboxed browser iframe, not on the SMARTTEP server.
+   - This is a learning playground, not an automatic code grader. It does not upload or save code submissions. Students can submit coursework through the existing Assignments section.
+
+DEPLOYMENT / CONFIGURATION
+- Replace the project files in the existing GitHub repository with this ZIP's contents, commit, and allow Render to deploy.
+- No new environment variables.
+- No new npm packages.
+- No new paid subscriptions or external accounts.
+- Keep the existing NIN_ENCRYPTION_KEY unchanged.
+- Do not delete or recreate the existing MongoDB database.
+- Existing passkeys, Admin 2FA, NIN encryption, certificates, attendance, exams, payments, ads and other V59 features are retained in the source project.
+
+SECURITY / LIMITATIONS
+- The code preview iframe uses the sandbox attribute with scripts enabled but without same-origin permission. Student code is not run as server-side Node.js and has no direct access to the SMARTTEP server's page context.
+- Do not use this playground to run unknown downloaded files or to enter secrets.
+- The dashboard reflects the existing lesson completion records. A student must mark lessons complete through the existing lesson workflow for the figures to change.
+- This ZIP was checked for JavaScript syntax, package.json validity and ZIP integrity. It has not been deployed to the user's Render service or tested against their live MongoDB account/browser.

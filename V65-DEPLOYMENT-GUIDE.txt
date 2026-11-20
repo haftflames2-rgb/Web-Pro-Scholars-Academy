@@ -1,0 +1,13 @@
+SMARTTEP ACADEMY V65 — DEPLOYMENT
+
+1. Back up your current GitHub repository before replacing files.
+2. Upload the contents of this ZIP into the existing repository root, keeping the folder structure.
+3. Commit and push; Render should deploy from GitHub as usual.
+4. No new Render environment variables, MongoDB accounts, Cloudinary settings, paid subscriptions or package dependencies are required.
+5. Sign in as a student and open My Project Portfolio. Create a test project, confirm it is private, then publish it and open its public link in a signed-out/private browser window. Make it private again and confirm the public link no longer works.
+
+NOTES
+- Project records are stored in the existing MongoDB database in the student_portfolios collection.
+- No project file upload is included in this version; use a live project URL or code repository link. This avoids adding storage/bandwidth use to the existing Cloudinary account.
+- A published project can be viewed by anyone who has its unguessable share URL. Students should not publish confidential information or client data.
+- This ZIP has not been deployed to or tested against the user's live Render/MongoDB environment.

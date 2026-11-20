@@ -1,0 +1,12 @@
+V69 DEPLOYMENT GUIDE
+
+1. Back up your current GitHub repository first.
+2. Extract this ZIP and replace the repository files with the contents, preserving your existing project structure.
+3. Commit and push to GitHub; Render should deploy automatically if auto-deploy is enabled.
+4. No new environment variables or paid services are required. Keep all existing environment variables unchanged.
+5. Sign in as Admin and open the Admin Portal. Find “Academy Intelligence & Analytics”. Choose 7, 30 or 90 days and refresh.
+6. Test the CSV export. Compare totals with existing course performance and attendance pages.
+
+If Render reports an error, do not repeatedly redeploy. Copy the relevant build/runtime log and seek help before changing environment variables or database records.
+
+Important: This feature is read-only and does not alter student grades, attendance, course enrollment, payments or existing reports. Counts may differ from older reports because each metric uses its own underlying record and timestamp fields.

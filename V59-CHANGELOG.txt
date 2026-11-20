@@ -1,0 +1,18 @@
+SMARTTEP ACADEMY V59 — PASSKEY SECURITY
+
+Built on V58; existing academy features and configuration retained.
+
+Added:
+- WebAuthn passkey registration for student, instructor and moderator accounts.
+- Device-local user verification (fingerprint, face recognition, or device PIN where supported).
+- Passkey sign-in using email + registered credential.
+- Own-device passkey listing and removal.
+- Five-minute challenge lifetime, server-side origin/RP/challenge verification and required user verification.
+- Security event records for passkey registration, removal and successful login.
+- Login-page passkey button and dashboard Passkeys links.
+
+Not changed:
+- Admin password + existing Admin 2FA requirement.
+- NIN encryption key, scholarship, course, payments, exams, community, ads, backup and audit features.
+
+Dependency: @simplewebauthn/server (open-source; no paid account). No new environment variables.

@@ -1,0 +1,23 @@
+SMARTTEP ACADEMY V66 — DEPLOYMENT GUIDE
+
+1. Download and keep a backup of your current GitHub repository before replacing anything.
+2. Extract this ZIP on your computer.
+3. Upload the extracted V66 project files to the same GitHub repository, replacing the old project files. Do not upload the ZIP itself as a substitute for the project files.
+4. Commit the changes. If Render is connected to that GitHub repository with automatic deploy enabled, Render should start a new deployment.
+5. Wait for the Render deployment to finish, then open the website and sign in with a student test account.
+6. Open the student portal and find Career Development Centre.
+7. Enter sample CV information, save, refresh the page and confirm the information loads again.
+8. Test Print / Save CV as PDF. In the print dialog, choose Save as PDF.
+9. Check existing login, courses, attendance, exams, portfolio, support tickets and live-class links after deployment.
+
+Environment variables:
+- V66 introduces no new environment variables.
+- Keep all existing Render environment variables unchanged, including MongoDB, session, Cloudinary, security/NIN and any optional LiveKit settings already in use.
+
+Database:
+- V66 creates a student_career_profiles collection and a unique index on studentId automatically during server startup.
+- Do not manually delete existing MongoDB collections.
+
+Important:
+- Do not replace your current live site until you have a backup.
+- This package passed local structural checks, but has not been tested against your live Render service or production MongoDB database.
